@@ -1,5 +1,13 @@
 ﻿Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 
+$identity=[Security.Principal.WindowsIdentity]::GetCurrent()
+$principal=New-Object Security.Principal.WindowsPrincipal($identity)
+if(-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)){
+ $arguments='-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "'+$PSCommandPath+'"'
+ Start-Process powershell.exe -Verb RunAs -ArgumentList $arguments -WindowStyle Hidden
+ exit
+}
+
 try {
 Add-Type -TypeDefinition @'
 using System;
@@ -47,11 +55,26 @@ $reader=New-Object System.Xml.XmlNodeReader $xaml
 $window=[Windows.Markup.XamlReader]::Load($reader)
 foreach($n in 'Temp','Cpu','Clock','Gpu','GpuMem','Ram','RamDetail','Disk','Network','Power','Close'){Set-Variable -Scope Script -Name $n -Value $window.FindName($n)}
 $script:lastTemp=$null
+$script:lastNetworkBytes=$null
+$script:lastNetworkTime=$null
 
 function Set-Position {
  $area=[System.Windows.SystemParameters]::WorkArea
  $window.Left=$area.Right-$window.Width-12
  $window.Top=$area.Bottom-$window.Height-6
+}
+function Get-NetworkBytes {
+ $total=[int64]0
+ [Net.NetworkInformation.NetworkInterface]::GetAllNetworkInterfaces() |
+  Where-Object {
+   $_.OperationalStatus -eq [Net.NetworkInformation.OperationalStatus]::Up -and
+   $_.NetworkInterfaceType -ne [Net.NetworkInformation.NetworkInterfaceType]::Loopback -and
+   $_.NetworkInterfaceType -ne [Net.NetworkInformation.NetworkInterfaceType]::Tunnel
+  } | ForEach-Object {
+   $stats=$_.GetIPv4Statistics()
+   $total+=[int64]$stats.BytesReceived+[int64]$stats.BytesSent
+  }
+ return $total
 }
 function Update-Values {
  try{$t=[HonorTaskbarTemperature]::Read();if(-not[single]::IsNaN($t)-and$t-gt 10-and$t-le 110){$script:lastTemp=[math]::Round($t)};if($null-ne$script:lastTemp){$script:Temp.Text="CPU $($script:lastTemp)°"}}catch{}
@@ -59,7 +82,7 @@ function Update-Values {
  try{$e=Get-CimInstance Win32_PerfFormattedData_GPUPerformanceCounters_GPUEngine|Where-Object{$_.Name-match'engtype_(3D|Compute|Graphics|VideoDecode|VideoEncode)'};$g=[math]::Min(100,[math]::Round(($e|Measure-Object UtilizationPercentage -Sum).Sum));$m=Get-CimInstance Win32_PerfFormattedData_GPUPerformanceCounters_GPUAdapterMemory;$gb=(($m|Measure-Object DedicatedUsage -Sum).Sum+($m|Measure-Object SharedUsage -Sum).Sum)/1GB;$script:Gpu.Text="GPU $g%";$script:GpuMem.Text=('GPU RAM {0:N1} GB'-f$gb)}catch{}
  try{$o=Get-CimInstance Win32_OperatingSystem;$total=[double]$o.TotalVisibleMemorySize;$used=$total-[double]$o.FreePhysicalMemory;$r=[math]::Round($used/$total*100);$script:Ram.Text="RAM $r%";$script:RamDetail.Text=('{0:N1} / {1:N1} GB'-f($used*1KB/1GB),($total*1KB/1GB))}catch{}
  try{$d=Get-CimInstance Win32_PerfFormattedData_PerfDisk_PhysicalDisk -Filter "Name='_Total'";$dp=[math]::Min(100,$d.PercentDiskTime);$script:Disk.Text=('DISK {0:N0}% · {1:N1} MB/s'-f$dp,($d.DiskBytesPerSec/1MB))}catch{}
- try{$n=Get-CimInstance Win32_PerfFormattedData_Tcpip_NetworkInterface|Where-Object{$_.Name-notmatch'Loopback|isatap|Teredo'};$nb=($n|Measure-Object BytesTotalPersec -Sum).Sum;$script:Network.Text=if($nb-ge 1MB){'NET {0:N1} MB/s'-f($nb/1MB)}else{'NET {0:N0} KB/s'-f($nb/1KB)}}catch{}
+ try{$now=[DateTime]::UtcNow;$networkBytes=Get-NetworkBytes;if($null-ne$script:lastNetworkBytes){$seconds=($now-$script:lastNetworkTime).TotalSeconds;$nb=[math]::Max(0,($networkBytes-$script:lastNetworkBytes)/$seconds);$script:Network.Text=if($nb-ge 1MB){'NET {0:N1} MB/s'-f($nb/1MB)}else{'NET {0:N1} KB/s'-f($nb/1KB)}};$script:lastNetworkBytes=$networkBytes;$script:lastNetworkTime=$now}catch{}
  try{$b=Get-CimInstance -Namespace root/wmi -ClassName BatteryStatus|Select-Object -First 1;if($b.Charging-and$b.ChargeRate-gt 0){$w=$b.ChargeRate/1000;$script:Power.Text=('CHARGE {0:N1} W'-f$w)}elseif($b.Discharging-and$b.DischargeRate-gt 0){$w=$b.DischargeRate/1000;$script:Power.Text=('BATTERY -{0:N1} W'-f$w)}else{$script:Power.Text='CHARGE 0 W'}}catch{}
  Set-Position
 }
