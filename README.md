@@ -1,31 +1,60 @@
 # System Pulse Widget
 
-A lightweight, installation-free Windows 10/11 system monitor. It runs as a clean two-row strip directly above the taskbar.
+Hafif, modern ve Windows 10/11 görev çubuğu üzerinde çalışan anlık donanım ve sistem izleme aracı.
 
-## Metrics
+![System Pulse](https://img.shields.io/badge/Windows-10%20%2F%2011-blue?style=flat-square)
+![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-5391FE?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-- CPU package temperature through Honor BIOS-WMI
-- CPU utilization and current frequency
-- GPU utilization and shared GPU memory
-- RAM utilization and used/total memory
-- Disk activity and transfer rate
-- Network throughput
-- Live battery charge or discharge power
+---
 
-All metrics refresh every two seconds. Refreshing pauses while the panel is being dragged to keep movement smooth.
+## ⚡ Özellikler & Göstergeler
 
-## Run
+- **CPU:** Anlık işlemci kullanımı (`%`), saat frekansı (`GHz`) ve paket sıcaklığı (Honor BIOS desteği)
+- **RAM:** Anlık bellek doluluğu (`%`) ve kullanılan / toplam RAM (`GB`)
+- **GPU:** Grafik birimi yükü (`%`) ve kullanılan VRAM / Paylaşılan Bellek (`GB`)
+- **DİSK:** Disk etkinlik yüzdesi (`%`), anlık **Okuma Hızı (R)** ve **Yazma Hızı (W)**
+- **AĞ:** Anlık **İndirme Hızı (↓ Download)** ve **Yükleme Hızı (↑ Upload)**
+- **GÜÇ / BATARYA:** Anlık **Şarj Olma / Deşarj Hızı (W - Watt)**, pil yüzdesi ve şarj durumu
+- **Görev Çubuğu Entegrasyonu:** Görev çubuğunun hemen üzerine oturur, sürüklenip bırakılabilir, konumu otomatik hatırlar.
+- **Sağ Tık Menüsü:** Görev çubuğuna sabitleme (sağ, orta, sol), her zaman üstte kalma ve Windows ile otomatik başlama seçenekleri.
 
-Double-click `Start-SystemPulse.cmd`, or run:
+---
+
+## 🚀 Kurulum
+
+Kurulum scriptini çalıştırmak için PowerShell üzerinden:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\SystemPulseTaskbar.ps1
+.\Install.ps1
 ```
 
-## Hardware compatibility
+Bu komut:
+1. Gerekli dosyaları `%LOCALAPPDATA%\SystemPulseWidget` altına yükler.
+2. Masaüstüne ve Başlat Menüsüne **System Pulse** kısayolu ekler.
+3. Windows başlangıcına ekler.
+4. Uygulamayı anında arka planda başlatır.
 
-CPU temperature is read from `BiosWmi::GetCpuTemp()` in HONOR BasicService on the Honor MagicBook Pro 14. It may be unavailable on other computers. All other metrics use standard Windows performance counters.
+---
 
-## License
+## 🛠️ Manuel Çalıştırma
+
+`Start-SystemPulse.cmd` dosyasına çift tıklayarak veya PowerShell ile:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File .\SystemPulseTaskbar.ps1
+```
+
+---
+
+## 🗑️ Kaldırma (Uninstall)
+
+```powershell
+.\Uninstall.ps1
+```
+
+---
+
+## 📄 Lisans
 
 MIT
