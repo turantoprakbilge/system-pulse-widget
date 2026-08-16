@@ -48,7 +48,7 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="System Pulse"
-        Width="980" Height="48"
+        Width="1000" Height="48"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize">
   <Window.Resources>
@@ -111,11 +111,11 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
         <!-- 7: Divider -->
         <ColumnDefinition Width="10"/>
         <!-- 8: DISK -->
-        <ColumnDefinition Width="1.35*"/>
+        <ColumnDefinition Width="1.45*"/>
         <!-- 9: Divider -->
         <ColumnDefinition Width="10"/>
         <!-- 10: NET -->
-        <ColumnDefinition Width="1.3*"/>
+        <ColumnDefinition Width="1.35*"/>
         <!-- 11: Divider -->
         <ColumnDefinition Width="10"/>
         <!-- 12: POWER -->
@@ -175,7 +175,7 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
           <TextBlock Text="DISK " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="DiskUsageText" Text="--%" Foreground="#56C7FF" Style="{StaticResource MetricValPrimary}"/>
         </StackPanel>
-        <TextBlock x:Name="DiskSpeedText" Text="R: -- · W: --" Style="{StaticResource MetricValSecondary}"/>
+        <TextBlock x:Name="DiskSpeedText" Text="R: 0 KB/s | W: 0 KB/s" Style="{StaticResource MetricValSecondary}"/>
       </StackPanel>
 
       <!-- Divider 5 -->
@@ -185,9 +185,9 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
       <StackPanel Grid.Column="10" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Real-time Network Download (DL) and Upload (UL) Speeds">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="NET " Style="{StaticResource MetricLabel}"/>
-          <TextBlock x:Name="NetDlText" Text="DL: -- MB/s" Foreground="#FF7FA8" Style="{StaticResource MetricValPrimary}"/>
+          <TextBlock x:Name="NetDlText" Text="DL: 0 KB/s" Foreground="#FF7FA8" Style="{StaticResource MetricValPrimary}"/>
         </StackPanel>
-        <TextBlock x:Name="NetUlText" Text="UL: -- KB/s" Style="{StaticResource MetricValSecondary}"/>
+        <TextBlock x:Name="NetUlText" Text="UL: 0 KB/s" Style="{StaticResource MetricValSecondary}"/>
       </StackPanel>
 
       <!-- Divider 6 -->
@@ -232,14 +232,14 @@ function Format-Rate([double]$bytes) {
     if ($bytes -ge 1GB) { return ('{0:N1} GB/s' -f ($bytes / 1GB)) }
     if ($bytes -ge 1MB) { return ('{0:N1} MB/s' -f ($bytes / 1MB)) }
     if ($bytes -ge 1KB) { return ('{0:N0} KB/s' -f ($bytes / 1KB)) }
-    return ('{0:N0} B/s' -f $bytes)
+    return '0 KB/s'
 }
 
 function Format-CompactRate([double]$bytes) {
-    if ($bytes -ge 1GB) { return ('{0:N1}G/s' -f ($bytes / 1GB)) }
-    if ($bytes -ge 1MB) { return ('{0:N1}M/s' -f ($bytes / 1MB)) }
-    if ($bytes -ge 1KB) { return ('{0:N0}K/s' -f ($bytes / 1KB)) }
-    return ('{0:N0}B/s' -f $bytes)
+    if ($bytes -ge 1GB) { return ('{0:N1} GB/s' -f ($bytes / 1GB)) }
+    if ($bytes -ge 1MB) { return ('{0:N1} MB/s' -f ($bytes / 1MB)) }
+    if ($bytes -ge 1KB) { return ('{0:N0} KB/s' -f ($bytes / 1KB)) }
+    return '0 KB/s'
 }
 
 function Get-SensorCpuTemp {
@@ -348,7 +348,7 @@ function Update-Metrics {
         
         $script:CpuText.Text = '{0:N0}%' -f $cpu
         $script:ClockText.Text = if ($null -ne $cpuTemp) {
-            ('{0:N2} GHz · {1} C' -f ($freq / 1000), $cpuTemp)
+            ('{0:N2} GHz | {1} C' -f ($freq / 1000), $cpuTemp)
         } else {
             ('{0:N2} GHz' -f ($freq / 1000))
         }
@@ -391,10 +391,10 @@ function Update-Metrics {
         $rSpeed = Format-CompactRate $disk.DiskReadBytesPerSec
         $wSpeed = Format-CompactRate $disk.DiskWriteBytesPerSec
         $script:DiskUsageText.Text = '{0:N0}%' -f $diskPct
-        $script:DiskSpeedText.Text = ('R: {0} · W: {1}' -f $rSpeed, $wSpeed)
+        $script:DiskSpeedText.Text = ('R: {0} | W: {1}' -f $rSpeed, $wSpeed)
     } catch {
         $script:DiskUsageText.Text = 'N/A'
-        $script:DiskSpeedText.Text = 'R: -- · W: --'
+        $script:DiskSpeedText.Text = 'R: -- | W: --'
     }
 
     # 5. NETWORK (Real-time Upload and Download Speeds)
@@ -442,7 +442,7 @@ function Update-Metrics {
         $batteryInfo = Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue | Select-Object -First 1
         $pct = if ($batteryInfo -and $batteryInfo.EstimatedChargeRemaining) { $batteryInfo.EstimatedChargeRemaining } else { 100 }
         $batTemp = Get-SensorBatteryTemp
-        $tempSuffix = if ($null -ne $batTemp) { " · $batTemp" } else { "" }
+        $tempSuffix = if ($null -ne $batTemp) { " | $batTemp" } else { "" }
 
         if ($battery) {
             if ($battery.Charging -and $battery.ChargeRate -gt 0) {
