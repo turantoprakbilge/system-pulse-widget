@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 Write-Host "=========================================" -ForegroundColor Cyan
-Write-Host "  System Pulse Widget Kuruluyor...       " -ForegroundColor Cyan
+Write-Host "  Installing System Pulse Widget...      " -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
 
 $sourceDir = $PSScriptRoot
@@ -14,6 +14,11 @@ if (-not $sourceDir) { $sourceDir = "C:\Users\turan\system-pulse-widget" }
 $installDir = Join-Path $env:LOCALAPPDATA 'SystemPulseWidget'
 if (-not (Test-Path $installDir)) {
     New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+}
+
+# Stop old running instances if any
+Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'SystemPulseTaskbar' } | ForEach-Object {
+    Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
 }
 
 # Copy files
@@ -30,7 +35,7 @@ $runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
 $vbsPath = Join-Path $installDir 'launcher.vbs'
 $startCmd = "wscript.exe //B `"$vbsPath`""
 Set-ItemProperty -Path $runKey -Name 'SystemPulseWidget' -Value $startCmd
-Write-Host "[OK] Windows baslangicina eklendi." -ForegroundColor Green
+Write-Host "[OK] Added to Windows Startup." -ForegroundColor Green
 
 # 2. Desktop Shortcut
 $wsh = New-Object -ComObject WScript.Shell
@@ -41,9 +46,9 @@ $shortcut = $wsh.CreateShortcut($desktopLnk)
 $shortcut.TargetPath = "wscript.exe"
 $shortcut.Arguments = "//B `"$vbsPath`""
 $shortcut.WorkingDirectory = $installDir
-$shortcut.Description = "System Pulse - Gorev Cubugu Donanim Monitoru"
+$shortcut.Description = "System Pulse - Taskbar Hardware Monitor"
 $shortcut.Save()
-Write-Host "[OK] Masaustu kisayolu olusturuldu: $desktopLnk" -ForegroundColor Green
+Write-Host "[OK] Desktop shortcut created: $desktopLnk" -ForegroundColor Green
 
 # 3. Start Menu Shortcut
 $startMenuDir = [Environment]::GetFolderPath([Environment+SpecialFolder]::Programs)
@@ -53,14 +58,14 @@ $shortcutMenu = $wsh.CreateShortcut($startMenuLnk)
 $shortcutMenu.TargetPath = "wscript.exe"
 $shortcutMenu.Arguments = "//B `"$vbsPath`""
 $shortcutMenu.WorkingDirectory = $installDir
-$shortcutMenu.Description = "System Pulse - Gorev Cubugu Donanim Monitoru"
+$shortcutMenu.Description = "System Pulse - Taskbar Hardware Monitor"
 $shortcutMenu.Save()
-Write-Host "[OK] Baslat menusu kisayolu olusturuldu: $startMenuLnk" -ForegroundColor Green
+Write-Host "[OK] Start Menu shortcut created: $startMenuLnk" -ForegroundColor Green
 
 # 4. Launch System Pulse Taskbar Widget now
-Write-Host "[OK] System Pulse baslatiliyor..." -ForegroundColor Green
+Write-Host "[OK] Starting System Pulse..." -ForegroundColor Green
 Start-Process -FilePath "wscript.exe" -ArgumentList "//B `"$vbsPath`"" -WorkingDirectory $installDir
 
 Write-Host "=========================================" -ForegroundColor Green
-Write-Host "  Kurulum Tamamlandi! System Pulse Aktif." -ForegroundColor Green
+Write-Host "  Installation Complete! System Pulse Active." -ForegroundColor Green
 Write-Host "=========================================" -ForegroundColor Green

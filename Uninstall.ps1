@@ -1,12 +1,12 @@
 # System Pulse Uninstallation Script
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-Write-Host "System Pulse kaldiriliyor..." -ForegroundColor Yellow
+Write-Host "Uninstalling System Pulse..." -ForegroundColor Yellow
 
 # 1. Kill any running System Pulse processes
-Get-Process powershell* -ErrorAction SilentlyContinue | Where-Object {
-    $_.CommandLine -match 'SystemPulse'
-} | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'SystemPulse' } | ForEach-Object {
+    Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+}
 
 # 2. Remove registry startup key
 Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'SystemPulseWidget' -ErrorAction SilentlyContinue
@@ -27,4 +27,4 @@ if (Test-Path $startMenuLnk) { Remove-Item -Path $startMenuLnk -Force -ErrorActi
 $installDir = Join-Path $env:LOCALAPPDATA 'SystemPulseWidget'
 if (Test-Path $installDir) { Remove-Item -Path $installDir -Recurse -Force -ErrorAction SilentlyContinue }
 
-Write-Host "[OK] System Pulse basariyla kaldirildi." -ForegroundColor Green
+Write-Host "[OK] System Pulse successfully uninstalled." -ForegroundColor Green

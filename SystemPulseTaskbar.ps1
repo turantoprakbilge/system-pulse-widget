@@ -48,7 +48,7 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="System Pulse"
-        Width="960" Height="48"
+        Width="980" Height="48"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize">
   <Window.Resources>
@@ -80,15 +80,15 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
 
     <Border.ContextMenu>
       <ContextMenu Background="#131923" Foreground="#E1E7F0" BorderBrush="#2D3A4E">
-        <MenuItem x:Name="MenuTopmost" Header="Her Zaman Ustte" IsCheckable="True" IsChecked="True"/>
+        <MenuItem x:Name="MenuTopmost" Header="Always on Top" IsCheckable="True" IsChecked="True"/>
         <Separator Background="#263244"/>
-        <MenuItem x:Name="MenuDockRight" Header="Gorev Cubuguna Sabitle (Sag Alt)"/>
-        <MenuItem x:Name="MenuDockCenter" Header="Gorev Cubuguna Sabitle (Orta Alt)"/>
-        <MenuItem x:Name="MenuDockLeft" Header="Gorev Cubuguna Sabitle (Sol Alt)"/>
+        <MenuItem x:Name="MenuDockRight" Header="Dock to Taskbar (Bottom Right)"/>
+        <MenuItem x:Name="MenuDockCenter" Header="Dock to Taskbar (Bottom Center)"/>
+        <MenuItem x:Name="MenuDockLeft" Header="Dock to Taskbar (Bottom Left)"/>
         <Separator Background="#263244"/>
-        <MenuItem x:Name="MenuAutostart" Header="Windows ile Baslat" IsCheckable="True"/>
+        <MenuItem x:Name="MenuAutostart" Header="Start with Windows" IsCheckable="True"/>
         <Separator Background="#263244"/>
-        <MenuItem x:Name="MenuExit" Header="Cikis"/>
+        <MenuItem x:Name="MenuExit" Header="Exit"/>
       </ContextMenu>
     </Border.ContextMenu>
 
@@ -103,29 +103,29 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
         <!-- 3: Divider -->
         <ColumnDefinition Width="10"/>
         <!-- 4: RAM -->
-        <ColumnDefinition Width="1.1*"/>
+        <ColumnDefinition Width="1.05*"/>
         <!-- 5: Divider -->
         <ColumnDefinition Width="10"/>
         <!-- 6: GPU -->
-        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="0.95*"/>
         <!-- 7: Divider -->
         <ColumnDefinition Width="10"/>
         <!-- 8: DISK -->
-        <ColumnDefinition Width="1.4*"/>
+        <ColumnDefinition Width="1.35*"/>
         <!-- 9: Divider -->
         <ColumnDefinition Width="10"/>
         <!-- 10: NET -->
-        <ColumnDefinition Width="1.35*"/>
+        <ColumnDefinition Width="1.3*"/>
         <!-- 11: Divider -->
         <ColumnDefinition Width="10"/>
         <!-- 12: POWER -->
-        <ColumnDefinition Width="1.25*"/>
+        <ColumnDefinition Width="1.35*"/>
         <!-- 13: Controls -->
         <ColumnDefinition Width="Auto"/>
       </Grid.ColumnDefinitions>
 
       <!-- Logo / Pulse Drag Area -->
-      <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="2,0,2,0" Cursor="SizeAll" ToolTip="Suruklemek icin basili tutun | Sag tik: Ayarlar">
+      <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="2,0,2,0" Cursor="SizeAll" ToolTip="Drag to move | Right-click for settings">
         <Ellipse x:Name="PulseDot" Width="8" Height="8" Fill="#43D9AD" Margin="0,0,6,0"/>
         <TextBlock Text="PULSE" Foreground="#F0F4F8" FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
       </StackPanel>
@@ -133,8 +133,8 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
       <!-- Divider 1 -->
       <Rectangle Grid.Column="1" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
-      <!-- CPU -->
-      <StackPanel Grid.Column="2" VerticalAlignment="Center" Cursor="SizeAll">
+      <!-- CPU (with CPU Temperature) -->
+      <StackPanel Grid.Column="2" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="CPU Utilization, Frequency and Package Temperature">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="CPU " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="CpuText" Text="--%" Foreground="#68A8FF" Style="{StaticResource MetricValPrimary}"/>
@@ -146,7 +146,7 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
       <Rectangle Grid.Column="3" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
       <!-- RAM -->
-      <StackPanel Grid.Column="4" VerticalAlignment="Center" Cursor="SizeAll">
+      <StackPanel Grid.Column="4" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Memory Usage and Allocated / Total Physical RAM">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="RAM " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="RamText" Text="--%" Foreground="#43D9AD" Style="{StaticResource MetricValPrimary}"/>
@@ -157,8 +157,8 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
       <!-- Divider 3 -->
       <Rectangle Grid.Column="5" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
-      <!-- GPU (No Temperature) -->
-      <StackPanel Grid.Column="6" VerticalAlignment="Center" Cursor="SizeAll">
+      <!-- GPU (Utilization and Memory - NO GPU Temperature) -->
+      <StackPanel Grid.Column="6" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="GPU Utilization and Shared/Dedicated Memory">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="GPU " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="GpuText" Text="--%" Foreground="#B28CFF" Style="{StaticResource MetricValPrimary}"/>
@@ -170,7 +170,7 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
       <Rectangle Grid.Column="7" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
       <!-- DISK (Read and Write Speeds) -->
-      <StackPanel Grid.Column="8" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Disk Kullanimi ve Anlik Okuma / Yazma Hizlari">
+      <StackPanel Grid.Column="8" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Disk Activity and Real-Time Read / Write Speeds">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="DISK " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="DiskUsageText" Text="--%" Foreground="#56C7FF" Style="{StaticResource MetricValPrimary}"/>
@@ -182,9 +182,9 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
       <Rectangle Grid.Column="9" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
       <!-- NET (Upload and Download Speeds) -->
-      <StackPanel Grid.Column="10" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Anlik Ag Indirme ve Yukleme Hizlari">
+      <StackPanel Grid.Column="10" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Real-time Network Download (DL) and Upload (UL) Speeds">
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="AG " Style="{StaticResource MetricLabel}"/>
+          <TextBlock Text="NET " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="NetDlText" Text="DL: -- MB/s" Foreground="#FF7FA8" Style="{StaticResource MetricValPrimary}"/>
         </StackPanel>
         <TextBlock x:Name="NetUlText" Text="UL: -- KB/s" Style="{StaticResource MetricValSecondary}"/>
@@ -193,19 +193,19 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
       <!-- Divider 6 -->
       <Rectangle Grid.Column="11" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
-      <!-- POWER (Charging Speed and Battery Status) -->
-      <StackPanel Grid.Column="12" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Sarj / Desarj Gucu ve Batarya Durumu">
+      <!-- POWER (Charging Speed, Battery Status and Battery Temp) -->
+      <StackPanel Grid.Column="12" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Power Draw / Charge Rate, Battery Status and Temperature">
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="GUC " Style="{StaticResource MetricLabel}"/>
+          <TextBlock Text="PWR " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="PowerRateText" Text="-- W" Foreground="#FFB86B" Style="{StaticResource MetricValPrimary}"/>
         </StackPanel>
-        <TextBlock x:Name="PowerDetailText" Text="Olculuyor..." Style="{StaticResource MetricValSecondary}"/>
+        <TextBlock x:Name="PowerDetailText" Text="Measuring..." Style="{StaticResource MetricValSecondary}"/>
       </StackPanel>
 
       <!-- Controls -->
       <StackPanel Grid.Column="13" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,0,0">
-        <Button x:Name="PinButton" Content="PIN" ToolTip="Her Zaman Ustte" Width="24" Height="22" Foreground="#43D9AD" Background="Transparent" BorderThickness="0" FontSize="9" FontWeight="Bold" Cursor="Hand" Margin="0,0,1,0"/>
-        <Button x:Name="CloseButton" Content="X" ToolTip="Kapat" Width="22" Height="22" Foreground="#707E94" Background="Transparent" BorderThickness="0" FontSize="11" FontWeight="Bold" Cursor="Hand"/>
+        <Button x:Name="PinButton" Content="PIN" ToolTip="Always on Top" Width="24" Height="22" Foreground="#43D9AD" Background="Transparent" BorderThickness="0" FontSize="9" FontWeight="Bold" Cursor="Hand" Margin="0,0,1,0"/>
+        <Button x:Name="CloseButton" Content="X" ToolTip="Close" Width="22" Height="22" Foreground="#707E94" Background="Transparent" BorderThickness="0" FontSize="11" FontWeight="Bold" Cursor="Hand"/>
       </StackPanel>
 
     </Grid>
@@ -246,13 +246,26 @@ function Get-SensorCpuTemp {
     if ($script:HonorCpuTempAvailable) {
         try {
             $t = [HonorBiosTemperature]::Read()
-            if (-not [single]::IsNaN($t) -and $t -gt 10 -and $t -le 110) {
+            if (-not [single]::IsNaN($t) -and $t -gt 10 -and $t -le 115) {
                 $script:LastValidCpuTemperature = [math]::Round($t)
                 return $script:LastValidCpuTemperature
             }
         } catch {}
         if ($null -ne $script:LastValidCpuTemperature) { return $script:LastValidCpuTemperature }
     }
+    return $null
+}
+
+function Get-SensorBatteryTemp {
+    try {
+        $bt = Get-CimInstance -Namespace root/wmi -ClassName BatteryTemperature -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($bt -and $bt.Temperature -gt 0) {
+            $celsius = [math]::Round(($bt.Temperature - 2732) / 10.0)
+            if ($celsius -gt 5 -and $celsius -lt 85) {
+                return "$celsius C"
+            }
+        }
+    } catch {}
     return $null
 }
 
@@ -327,7 +340,7 @@ function Update-Metrics {
     $script:pulseToggle = -not $script:pulseToggle
     $script:PulseDot.Opacity = if ($script:pulseToggle) { 1.0 } else { 0.45 }
 
-    # 1. CPU and Frequency and Optional CPU Temp
+    # 1. CPU, Frequency and CPU Temperature
     try {
         $cpu = (Get-CimInstance Win32_PerfFormattedData_PerfOS_Processor -Filter "Name='_Total'" -ErrorAction Stop).PercentProcessorTime
         $freq = (Get-CimInstance Win32_PerfFormattedData_Counters_ProcessorInformation -Filter "Name='_Total'" -ErrorAction Stop).ProcessorFrequency
@@ -423,40 +436,42 @@ function Update-Metrics {
         $script:NetUlText.Text = 'UL: N/A'
     }
 
-    # 6. POWER / BATTERY (Live Charging/Discharging Rate and Percentage)
+    # 6. POWER / BATTERY (Live Charging/Discharging Rate, Battery Temp & Status)
     try {
         $battery = Get-CimInstance -Namespace root/wmi -ClassName BatteryStatus -ErrorAction SilentlyContinue | Select-Object -First 1
         $batteryInfo = Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue | Select-Object -First 1
         $pct = if ($batteryInfo -and $batteryInfo.EstimatedChargeRemaining) { $batteryInfo.EstimatedChargeRemaining } else { 100 }
+        $batTemp = Get-SensorBatteryTemp
+        $tempSuffix = if ($null -ne $batTemp) { " · $batTemp" } else { "" }
 
         if ($battery) {
             if ($battery.Charging -and $battery.ChargeRate -gt 0) {
                 $watt = $battery.ChargeRate / 1000
                 $script:PowerRateText.Text = ('+{0:N1} W' -f $watt)
                 $script:PowerRateText.Foreground = [Windows.Media.BrushConverter]::new().ConvertFromString('#43D9AD')
-                $script:PowerDetailText.Text = "$pct% (Sarj)"
+                $script:PowerDetailText.Text = "$pct% (Charging$tempSuffix)"
             } elseif ($battery.Discharging -and $battery.DischargeRate -gt 0) {
                 $watt = $battery.DischargeRate / 1000
                 $script:PowerRateText.Text = ('-{0:N1} W' -f $watt)
                 $script:PowerRateText.Foreground = [Windows.Media.BrushConverter]::new().ConvertFromString('#FFB86B')
-                $script:PowerDetailText.Text = "$pct% (Pilde)"
+                $script:PowerDetailText.Text = "$pct% (Battery$tempSuffix)"
             } elseif ($battery.PowerOnline) {
-                $script:PowerRateText.Text = "Prizde"
+                $script:PowerRateText.Text = "Plugged In"
                 $script:PowerRateText.Foreground = [Windows.Media.BrushConverter]::new().ConvertFromString('#68A8FF')
-                $script:PowerDetailText.Text = "$pct% (Dolu)"
+                $script:PowerDetailText.Text = "$pct% (Full$tempSuffix)"
             } else {
                 $script:PowerRateText.Text = "$pct%"
                 $script:PowerRateText.Foreground = [Windows.Media.BrushConverter]::new().ConvertFromString('#96A1B3')
-                $script:PowerDetailText.Text = "Bosta"
+                $script:PowerDetailText.Text = "Idle$tempSuffix"
             }
         } else {
             $script:PowerRateText.Text = "$pct%"
             $script:PowerRateText.Foreground = [Windows.Media.BrushConverter]::new().ConvertFromString('#96A1B3')
-            $script:PowerDetailText.Text = "Masaustu"
+            $script:PowerDetailText.Text = "Desktop"
         }
     } catch {
         $script:PowerRateText.Text = 'N/A'
-        $script:PowerDetailText.Text = 'Sensor Yok'
+        $script:PowerDetailText.Text = 'No Sensor'
     }
 }
 

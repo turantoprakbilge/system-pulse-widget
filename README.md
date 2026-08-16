@@ -1,6 +1,6 @@
 # System Pulse Widget
 
-Hafif, modern ve Windows 10/11 görev çubuğu üzerinde çalışan anlık donanım ve sistem izleme aracı.
+A lightweight, modern, real-time hardware and system monitor designed for Windows 10/11 taskbars.
 
 ![System Pulse](https://img.shields.io/badge/Windows-10%20%2F%2011-blue?style=flat-square)
 ![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-5391FE?style=flat-square)
@@ -8,38 +8,38 @@ Hafif, modern ve Windows 10/11 görev çubuğu üzerinde çalışan anlık donan
 
 ---
 
-## ⚡ Özellikler & Göstergeler
+## ⚡ Features & Live Metrics
 
-- **CPU:** Anlık işlemci kullanımı (`%`), saat frekansı (`GHz`) ve paket sıcaklığı (Honor BIOS desteği)
-- **RAM:** Anlık bellek doluluğu (`%`) ve kullanılan / toplam RAM (`GB`)
-- **GPU:** Grafik birimi yükü (`%`) ve kullanılan VRAM / Paylaşılan Bellek (`GB`)
-- **DİSK:** Disk etkinlik yüzdesi (`%`), anlık **Okuma Hızı (R)** ve **Yazma Hızı (W)**
-- **AĞ:** Anlık **İndirme Hızı (↓ Download)** ve **Yükleme Hızı (↑ Upload)**
-- **GÜÇ / BATARYA:** Anlık **Şarj Olma / Deşarj Hızı (W - Watt)**, pil yüzdesi ve şarj durumu
-- **Görev Çubuğu Entegrasyonu:** Görev çubuğunun hemen üzerine oturur, sürüklenip bırakılabilir, konumu otomatik hatırlar.
-- **Sağ Tık Menüsü:** Görev çubuğuna sabitleme (sağ, orta, sol), her zaman üstte kalma ve Windows ile otomatik başlama seçenekleri.
+- **CPU:** Real-time utilization (`%`), clock frequency (`GHz`), and package temperature (`°C`, Honor BIOS / ACPI)
+- **RAM:** Memory load (`%`) and used / total physical memory (`GB`)
+- **GPU:** GPU core utilization (`%`) and dedicated/shared memory usage (`GB`)
+- **DISK:** Disk active time (`%`), real-time **Read Speed (R)** and **Write Speed (W)**
+- **NET:** Real-time **Download Speed (DL)** and **Upload Speed (UL)**
+- **POWER / BATTERY:** Live **Charge / Discharge Power (Watts)**, battery percentage, charging status, and battery temperature (if supported)
+- **Taskbar Integration:** Docks smoothly right above the taskbar, fully draggable, and automatically remembers its position
+- **Context Menu:** Right-click to dock (Bottom Right, Bottom Center, Bottom Left), toggle *Always on Top*, and toggle *Start with Windows*
 
 ---
 
-## 🚀 Kurulum
+## 🚀 Installation
 
-Kurulum scriptini çalıştırmak için PowerShell üzerinden:
+Run the installation script in PowerShell:
 
 ```powershell
-.\Install.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Install.ps1
 ```
 
-Bu komut:
-1. Gerekli dosyaları `%LOCALAPPDATA%\SystemPulseWidget` altına yükler.
-2. Masaüstüne ve Başlat Menüsüne **System Pulse** kısayolu ekler.
-3. Windows başlangıcına ekler.
-4. Uygulamayı anında arka planda başlatır.
+This will:
+1. Copy the application to `%LOCALAPPDATA%\SystemPulseWidget`.
+2. Create shortcuts on your Desktop and Start Menu.
+3. Register System Pulse to start with Windows.
+4. Launch the application silently in the background.
 
 ---
 
-## 🛠️ Manuel Çalıştırma
+## 🛠️ Manual Launch
 
-`Start-SystemPulse.cmd` dosyasına çift tıklayarak veya PowerShell ile:
+Double-click `Start-SystemPulse.cmd`, or run:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File .\SystemPulseTaskbar.ps1
@@ -47,14 +47,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File .\System
 
 ---
 
-## 🗑️ Kaldırma (Uninstall)
+## 🗑️ Uninstallation
 
 ```powershell
-.\Uninstall.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Uninstall.ps1
 ```
 
 ---
 
-## 📄 Lisans
+## 📄 License
 
 MIT

@@ -57,7 +57,7 @@ if (-not (Test-Path $settingsDir)) { New-Item -ItemType Directory -Path $setting
           <TextBlock Text="SYSTEM PULSE" Foreground="#F2F6FC" FontWeight="SemiBold" FontSize="14" VerticalAlignment="Center"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-          <Button x:Name="AlwaysButton" Content="●" ToolTip="Her Zaman Üstte" Width="28" Height="26" Foreground="#43D9AD" Background="Transparent" BorderThickness="0" FontSize="12" Cursor="Hand"/>
+          <Button x:Name="AlwaysButton" Content="●" ToolTip="Always on Top" Width="28" Height="26" Foreground="#43D9AD" Background="Transparent" BorderThickness="0" FontSize="12" Cursor="Hand"/>
           <Button x:Name="CloseButton" Content="×" Width="28" Height="26" Foreground="#96A1B3" Background="Transparent" BorderThickness="0" FontSize="19" Cursor="Hand"/>
         </StackPanel>
       </Grid>
@@ -83,13 +83,13 @@ if (-not (Test-Path $settingsDir)) { New-Item -ItemType Directory -Path $setting
           <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
           <Border Grid.Column="0" Background="#1B222E" CornerRadius="10" Padding="10,8" Margin="0,0,4,0">
             <StackPanel>
-              <TextBlock Text="DOWNLOAD (İNDİRME)" Foreground="#96A1B3" FontSize="9.5"/>
+              <TextBlock Text="DOWNLOAD" Foreground="#96A1B3" FontSize="9.5"/>
               <TextBlock x:Name="NetDlText" Text="↓ -- MB/s" Foreground="#FF7FA8" FontSize="16" FontWeight="SemiBold"/>
             </StackPanel>
           </Border>
           <Border Grid.Column="1" Background="#1B222E" CornerRadius="10" Padding="10,8" Margin="4,0,0,0">
             <StackPanel>
-              <TextBlock Text="UPLOAD (YÜKLEME)" Foreground="#96A1B3" FontSize="9.5"/>
+              <TextBlock Text="UPLOAD" Foreground="#96A1B3" FontSize="9.5"/>
               <TextBlock x:Name="NetUlText" Text="↑ -- KB/s" Foreground="#FFA3C0" FontSize="16" FontWeight="SemiBold"/>
             </StackPanel>
           </Border>
@@ -107,21 +107,21 @@ if (-not (Test-Path $settingsDir)) { New-Item -ItemType Directory -Path $setting
           </Border>
           <Border Grid.Column="1" Background="#1B222E" CornerRadius="10" Padding="8,8" Margin="3,0,3,0">
             <StackPanel>
-              <TextBlock Text="DİSK (OKUMA/YAZMA)" Foreground="#96A1B3" FontSize="9"/>
+              <TextBlock Text="DISK (R / W)" Foreground="#96A1B3" FontSize="9"/>
               <TextBlock x:Name="DiskText" Text="--%" Foreground="#56C7FF" FontSize="16" FontWeight="SemiBold"/>
               <TextBlock x:Name="DiskSpeedText" Text="R: -- W: --" Foreground="#687386" FontSize="8.5"/>
             </StackPanel>
           </Border>
           <Border Grid.Column="2" Background="#1B222E" CornerRadius="10" Padding="8,8" Margin="3,0,0,0">
             <StackPanel>
-              <TextBlock Text="GÜÇ / ŞARJ" Foreground="#96A1B3" FontSize="9.5"/>
+              <TextBlock Text="POWER" Foreground="#96A1B3" FontSize="9.5"/>
               <TextBlock x:Name="ChargeText" Text="-- W" Foreground="#FFB86B" FontSize="16" FontWeight="SemiBold"/>
-              <TextBlock x:Name="ChargeStateText" Text="Ölçülüyor" Foreground="#687386" FontSize="8.5"/>
+              <TextBlock x:Name="ChargeStateText" Text="Measuring..." Foreground="#687386" FontSize="8.5"/>
             </StackPanel>
           </Border>
         </Grid>
       </StackPanel>
-      <TextBlock Grid.Row="2" x:Name="StatusText" Text="Başlatılıyor…" Foreground="#687386" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis"/>
+      <TextBlock Grid.Row="2" x:Name="StatusText" Text="Starting..." Foreground="#687386" FontSize="10" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis"/>
     </Grid>
   </Border>
 </Window>
@@ -150,13 +150,45 @@ function Format-CompactRate([double]$bytes) {
     return ('{0:N0}B' -f $bytes)
 }
 
+function Get-SensorCpuTemp {
+    if ($script:HonorCpuTempAvailable) {
+        try {
+            $t = [HonorBiosTemperature]::Read()
+            if (-not [single]::IsNaN($t) -and $t -gt 10 -and $t -le 115) {
+                $script:LastValidCpuTemperature = [math]::Round($t)
+                return $script:LastValidCpuTemperature
+            }
+        } catch {}
+        if ($null -ne $script:LastValidCpuTemperature) { return $script:LastValidCpuTemperature }
+    }
+    return $null
+}
+
+function Get-SensorBatteryTemp {
+    try {
+        $bt = Get-CimInstance -Namespace root/wmi -ClassName BatteryTemperature -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($bt -and $bt.Temperature -gt 0) {
+            $celsius = [math]::Round(($bt.Temperature - 2732) / 10.0)
+            if ($celsius -gt 5 -and $celsius -lt 85) {
+                return "$celsius C"
+            }
+        }
+    } catch {}
+    return $null
+}
+
 function Update-Metrics {
     try {
         $cpu = (Get-CimInstance Win32_PerfFormattedData_PerfOS_Processor -Filter "Name='_Total'" -ErrorAction Stop).PercentProcessorTime
         $freq = (Get-CimInstance Win32_PerfFormattedData_Counters_ProcessorInformation -Filter "Name='_Total'" -ErrorAction Stop).ProcessorFrequency
+        $cpuTemp = Get-SensorCpuTemp
         $script:CpuText.Text = '{0:N0}%' -f $cpu
         $script:CpuBar.Value = [math]::Min(100, $cpu)
-        $script:ClockText.Text = '{0:N2} GHz' -f ($freq / 1000)
+        $script:ClockText.Text = if ($null -ne $cpuTemp) {
+            ('{0:N2} GHz · {1} C' -f ($freq / 1000), $cpuTemp)
+        } else {
+            ('{0:N2} GHz' -f ($freq / 1000))
+        }
     } catch { $script:CpuText.Text = 'N/A'; $script:ClockText.Text = 'N/A' }
 
     try {
@@ -193,26 +225,28 @@ function Update-Metrics {
         $battery = Get-CimInstance -Namespace root/wmi -ClassName BatteryStatus -ErrorAction SilentlyContinue | Select-Object -First 1
         $batteryInfo = Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue | Select-Object -First 1
         $pct = if ($batteryInfo -and $batteryInfo.EstimatedChargeRemaining) { $batteryInfo.EstimatedChargeRemaining } else { 100 }
+        $batTemp = Get-SensorBatteryTemp
+        $tempSuffix = if ($null -ne $batTemp) { " · $batTemp" } else { "" }
 
         if ($battery) {
             if ($battery.Charging -and $battery.ChargeRate -gt 0) {
                 $script:ChargeText.Text = '+{0:N1} W' -f ($battery.ChargeRate / 1000)
-                $script:ChargeStateText.Text = "$pct% (Şarj)"
+                $script:ChargeStateText.Text = "$pct% (Charging$tempSuffix)"
             } elseif ($battery.Discharging -and $battery.DischargeRate -gt 0) {
                 $script:ChargeText.Text = '-{0:N1} W' -f ($battery.DischargeRate / 1000)
-                $script:ChargeStateText.Text = "$pct% (Pilde)"
+                $script:ChargeStateText.Text = "$pct% (Battery$tempSuffix)"
             } elseif ($battery.PowerOnline) {
-                $script:ChargeText.Text = 'Prizde'
-                $script:ChargeStateText.Text = "$pct% (Dolu)"
+                $script:ChargeText.Text = 'Plugged In'
+                $script:ChargeStateText.Text = "$pct% (Full$tempSuffix)"
             } else {
                 $script:ChargeText.Text = "$pct%"
-                $script:ChargeStateText.Text = 'Boşta'
+                $script:ChargeStateText.Text = "Idle$tempSuffix"
             }
         } else {
-            $script:ChargeText.Text = "$pct%"
-            $script:ChargeStateText.Text = 'Masaüstü'
+            $script:PowerText.Text = "$pct%"
+            $script:ChargeStateText.Text = 'Desktop'
         }
-    } catch { $script:ChargeText.Text = 'N/A'; $script:ChargeStateText.Text = 'Sensör Yok' }
+    } catch { $script:ChargeText.Text = 'N/A'; $script:ChargeStateText.Text = 'No Sensor' }
 
     try {
         $now = [DateTime]::UtcNow
@@ -251,7 +285,7 @@ function Update-Metrics {
         $script:NetUlText.Text = '↑ N/A'
     }
 
-    $script:StatusText.Text = 'Son güncelleme: ' + (Get-Date -Format 'HH:mm:ss')
+    $script:StatusText.Text = 'Last updated: ' + (Get-Date -Format 'HH:mm:ss')
 }
 
 $script:DragArea.Add_MouseLeftButtonDown({
