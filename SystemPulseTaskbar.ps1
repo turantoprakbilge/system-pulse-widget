@@ -194,7 +194,7 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
       <Rectangle Grid.Column="11" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
       <!-- POWER (Charging Speed, Battery Status and Battery Temp) -->
-      <StackPanel Grid.Column="12" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Power Draw / Charge Rate, Battery Status and Temperature">
+      <StackPanel Grid.Column="12" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Live Charging Power (Watts), Battery Status and Temperature">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="PWR " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="PowerRateText" Text="-- W" Foreground="#FFB86B" Style="{StaticResource MetricValPrimary}"/>
@@ -436,7 +436,7 @@ function Update-Metrics {
         $script:NetUlText.Text = 'UL: N/A'
     }
 
-    # 6. POWER / BATTERY (Live Charging/Discharging Rate, Battery Temp & Status)
+    # 6. POWER / BATTERY (Live Charging/Discharging Wattage, Battery Temp & Status)
     try {
         $battery = Get-CimInstance -Namespace root/wmi -ClassName BatteryStatus -ErrorAction SilentlyContinue | Select-Object -First 1
         $batteryInfo = Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -456,7 +456,7 @@ function Update-Metrics {
                 $script:PowerRateText.Foreground = [Windows.Media.BrushConverter]::new().ConvertFromString('#FFB86B')
                 $script:PowerDetailText.Text = "$pct% (Battery$tempSuffix)"
             } elseif ($battery.PowerOnline) {
-                $script:PowerRateText.Text = "Plugged In"
+                $script:PowerRateText.Text = "0.0 W (AC)"
                 $script:PowerRateText.Foreground = [Windows.Media.BrushConverter]::new().ConvertFromString('#68A8FF')
                 $script:PowerDetailText.Text = "$pct% (Full$tempSuffix)"
             } else {
