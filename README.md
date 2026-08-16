@@ -10,12 +10,13 @@ A lightweight, modern, real-time hardware and system monitor designed for Window
 
 ## ⚡ Features & Live Metrics
 
-- **CPU:** Real-time utilization (`%`), clock frequency (`GHz`), and package temperature (`°C`, Honor BIOS / ACPI)
+- **SYS / UPTIME:** System uptime (`2d 4h`), and real-time **Top Process** consuming the most CPU (e.g. `chrome (14%)`)
+- **CPU:** Real-time utilization (`%`), clock frequency (`GHz`), and package temperature (`C`, Honor BIOS / ACPI)
 - **RAM:** Memory load (`%`) and used / total physical memory (`GB`)
 - **GPU:** GPU core utilization (`%`) and dedicated/shared memory usage (`GB`)
 - **DISK:** Disk active time (`%`), real-time **Read Speed (R)** and **Write Speed (W)**
-- **NET:** Real-time **Download Speed (DL)** and **Upload Speed (UL)**
-- **POWER / BATTERY:** Live **Charge / Discharge Power (Watts)**, battery percentage, charging status, and battery temperature (if supported)
+- **NET:** Real-time **Download Speed (DL)**, **Upload Speed (UL)**, and live **Ping Latency** (`ms`)
+- **POWER / BATTERY:** Live **Charge / Discharge Power (Watts)**, battery percentage, **Estimated Remaining Time** (e.g. `3h 45m`), and battery temperature
 - **Taskbar Integration:** Docks smoothly right above the taskbar, fully draggable, and automatically remembers its position
 - **Context Menu:** Right-click to dock (Bottom Right, Bottom Center, Bottom Left), toggle *Always on Top*, and toggle *Start with Windows*
 

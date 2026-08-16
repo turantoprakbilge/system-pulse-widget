@@ -48,7 +48,7 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="System Pulse"
-        Width="1000" Height="48"
+        Width="1120" Height="48"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize">
   <Window.Resources>
@@ -97,30 +97,34 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
         <!-- 0: Logo -->
         <ColumnDefinition Width="Auto"/>
         <!-- 1: Divider -->
-        <ColumnDefinition Width="14"/>
-        <!-- 2: CPU -->
-        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="12"/>
+        <!-- 2: SYS (Uptime and Top Process) -->
+        <ColumnDefinition Width="1.15*"/>
         <!-- 3: Divider -->
-        <ColumnDefinition Width="10"/>
-        <!-- 4: RAM -->
-        <ColumnDefinition Width="1.05*"/>
+        <ColumnDefinition Width="8"/>
+        <!-- 4: CPU -->
+        <ColumnDefinition Width="*"/>
         <!-- 5: Divider -->
-        <ColumnDefinition Width="10"/>
-        <!-- 6: GPU -->
-        <ColumnDefinition Width="0.95*"/>
+        <ColumnDefinition Width="8"/>
+        <!-- 6: RAM -->
+        <ColumnDefinition Width="1.05*"/>
         <!-- 7: Divider -->
-        <ColumnDefinition Width="10"/>
-        <!-- 8: DISK -->
-        <ColumnDefinition Width="1.45*"/>
+        <ColumnDefinition Width="8"/>
+        <!-- 8: GPU -->
+        <ColumnDefinition Width="0.95*"/>
         <!-- 9: Divider -->
-        <ColumnDefinition Width="10"/>
-        <!-- 10: NET -->
+        <ColumnDefinition Width="8"/>
+        <!-- 10: DISK -->
         <ColumnDefinition Width="1.35*"/>
         <!-- 11: Divider -->
-        <ColumnDefinition Width="10"/>
-        <!-- 12: POWER -->
+        <ColumnDefinition Width="8"/>
+        <!-- 12: NET (with Ping) -->
         <ColumnDefinition Width="1.35*"/>
-        <!-- 13: Controls -->
+        <!-- 13: Divider -->
+        <ColumnDefinition Width="8"/>
+        <!-- 14: POWER (with Estimated Remaining Time) -->
+        <ColumnDefinition Width="1.35*"/>
+        <!-- 15: Controls -->
         <ColumnDefinition Width="Auto"/>
       </Grid.ColumnDefinitions>
 
@@ -133,8 +137,20 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
       <!-- Divider 1 -->
       <Rectangle Grid.Column="1" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
+      <!-- SYS (Uptime & Top Resource Process) -->
+      <StackPanel Grid.Column="2" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="System Uptime and Top CPU Consumer">
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="SYS " Style="{StaticResource MetricLabel}"/>
+          <TextBlock x:Name="UptimeText" Text="-- d -- h" Foreground="#E2E8F0" Style="{StaticResource MetricValPrimary}"/>
+        </StackPanel>
+        <TextBlock x:Name="TopProcText" Text="Top: measuring..." Style="{StaticResource MetricValSecondary}" TextTrimming="CharacterEllipsis"/>
+      </StackPanel>
+
+      <!-- Divider 2 -->
+      <Rectangle Grid.Column="3" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
+
       <!-- CPU (with CPU Temperature) -->
-      <StackPanel Grid.Column="2" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="CPU Utilization, Frequency and Package Temperature">
+      <StackPanel Grid.Column="4" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="CPU Utilization, Frequency and Package Temperature">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="CPU " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="CpuText" Text="--%" Foreground="#68A8FF" Style="{StaticResource MetricValPrimary}"/>
@@ -142,11 +158,11 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
         <TextBlock x:Name="ClockText" Text="-- GHz" Style="{StaticResource MetricValSecondary}"/>
       </StackPanel>
 
-      <!-- Divider 2 -->
-      <Rectangle Grid.Column="3" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
+      <!-- Divider 3 -->
+      <Rectangle Grid.Column="5" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
       <!-- RAM -->
-      <StackPanel Grid.Column="4" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Memory Usage and Allocated / Total Physical RAM">
+      <StackPanel Grid.Column="6" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Memory Usage and Allocated / Total Physical RAM">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="RAM " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="RamText" Text="--%" Foreground="#43D9AD" Style="{StaticResource MetricValPrimary}"/>
@@ -154,11 +170,11 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
         <TextBlock x:Name="RamDetailText" Text="-- / -- GB" Style="{StaticResource MetricValSecondary}"/>
       </StackPanel>
 
-      <!-- Divider 3 -->
-      <Rectangle Grid.Column="5" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
+      <!-- Divider 4 -->
+      <Rectangle Grid.Column="7" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
       <!-- GPU (Utilization and Memory - NO GPU Temperature) -->
-      <StackPanel Grid.Column="6" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="GPU Utilization and Shared/Dedicated Memory">
+      <StackPanel Grid.Column="8" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="GPU Utilization and Shared/Dedicated Memory">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="GPU " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="GpuText" Text="--%" Foreground="#B28CFF" Style="{StaticResource MetricValPrimary}"/>
@@ -166,11 +182,11 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
         <TextBlock x:Name="GpuMemText" Text="-- GB" Style="{StaticResource MetricValSecondary}"/>
       </StackPanel>
 
-      <!-- Divider 4 -->
-      <Rectangle Grid.Column="7" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
+      <!-- Divider 5 -->
+      <Rectangle Grid.Column="9" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
       <!-- DISK (Read and Write Speeds) -->
-      <StackPanel Grid.Column="8" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Disk Activity and Real-Time Read / Write Speeds">
+      <StackPanel Grid.Column="10" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Disk Activity and Real-Time Read / Write Speeds">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="DISK " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="DiskUsageText" Text="--%" Foreground="#56C7FF" Style="{StaticResource MetricValPrimary}"/>
@@ -178,23 +194,23 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
         <TextBlock x:Name="DiskSpeedText" Text="R: 0 KB/s | W: 0 KB/s" Style="{StaticResource MetricValSecondary}"/>
       </StackPanel>
 
-      <!-- Divider 5 -->
-      <Rectangle Grid.Column="9" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
+      <!-- Divider 6 -->
+      <Rectangle Grid.Column="11" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
-      <!-- NET (Upload and Download Speeds) -->
-      <StackPanel Grid.Column="10" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Real-time Network Download (DL) and Upload (UL) Speeds">
+      <!-- NET (Upload, Download & Ping Latency) -->
+      <StackPanel Grid.Column="12" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Network Download (DL), Upload (UL) and Ping Latency">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="NET " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="NetDlText" Text="DL: 0 KB/s" Foreground="#FF7FA8" Style="{StaticResource MetricValPrimary}"/>
         </StackPanel>
-        <TextBlock x:Name="NetUlText" Text="UL: 0 KB/s" Style="{StaticResource MetricValSecondary}"/>
+        <TextBlock x:Name="NetUlText" Text="UL: 0 KB/s | -- ms" Style="{StaticResource MetricValSecondary}"/>
       </StackPanel>
 
-      <!-- Divider 6 -->
-      <Rectangle Grid.Column="11" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
+      <!-- Divider 7 -->
+      <Rectangle Grid.Column="13" Width="1" Fill="#1E2736" HorizontalAlignment="Center" Margin="0,3"/>
 
-      <!-- POWER (Charging Speed, Battery Status and Battery Temp) -->
-      <StackPanel Grid.Column="12" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Live Charging Power (Watts), Battery Status and Temperature">
+      <!-- POWER (Charging Speed, Battery Status, Temp and Estimated Remaining Time) -->
+      <StackPanel Grid.Column="14" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Live Power Draw, Battery Percentage and Estimated Remaining Time">
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="PWR " Style="{StaticResource MetricLabel}"/>
           <TextBlock x:Name="PowerRateText" Text="-- W" Foreground="#FFB86B" Style="{StaticResource MetricValPrimary}"/>
@@ -203,7 +219,7 @@ $script:settingsPath = Join-Path $script:appDataDir 'settings.json'
       </StackPanel>
 
       <!-- Controls -->
-      <StackPanel Grid.Column="13" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,0,0">
+      <StackPanel Grid.Column="15" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,0,0">
         <Button x:Name="PinButton" Content="PIN" ToolTip="Always on Top" Width="24" Height="22" Foreground="#43D9AD" Background="Transparent" BorderThickness="0" FontSize="9" FontWeight="Bold" Cursor="Hand" Margin="0,0,1,0"/>
         <Button x:Name="CloseButton" Content="X" ToolTip="Close" Width="22" Height="22" Foreground="#707E94" Background="Transparent" BorderThickness="0" FontSize="11" FontWeight="Bold" Cursor="Hand"/>
       </StackPanel>
@@ -217,7 +233,7 @@ $reader = New-Object System.Xml.XmlNodeReader $xaml
 $window = [Windows.Markup.XamlReader]::Load($reader)
 
 # Element variable bindings
-$names = 'MainBorder','PulseDot','CpuText','ClockText','RamText','RamDetailText','GpuText','GpuMemText','DiskUsageText','DiskSpeedText','NetDlText','NetUlText','PowerRateText','PowerDetailText','PinButton','CloseButton','MenuTopmost','MenuDockRight','MenuDockCenter','MenuDockLeft','MenuAutostart','MenuExit'
+$names = 'MainBorder','PulseDot','UptimeText','TopProcText','CpuText','ClockText','RamText','RamDetailText','GpuText','GpuMemText','DiskUsageText','DiskSpeedText','NetDlText','NetUlText','PowerRateText','PowerDetailText','PinButton','CloseButton','MenuTopmost','MenuDockRight','MenuDockCenter','MenuDockLeft','MenuAutostart','MenuExit'
 foreach ($name in $names) {
     $elem = $window.FindName($name)
     if ($elem) { Set-Variable -Name $name -Value $elem -Scope Script }
@@ -227,6 +243,10 @@ $script:lastRx = [int64]0
 $script:lastTx = [int64]0
 $script:lastNetTime = $null
 $script:pulseToggle = $false
+$script:cachedPing = "-- ms"
+$script:tickCounter = 0
+$script:numCores = [Environment]::ProcessorCount
+$script:pinger = [System.Net.NetworkInformation.Ping]::new()
 
 function Format-Rate([double]$bytes) {
     if ($bytes -ge 1GB) { return ('{0:N1} GB/s' -f ($bytes / 1GB)) }
@@ -336,11 +356,42 @@ function Set-Autostart([bool]$enable) {
 }
 
 function Update-Metrics {
+    $script:tickCounter++
+    
     # Visual pulse tick
     $script:pulseToggle = -not $script:pulseToggle
     $script:PulseDot.Opacity = if ($script:pulseToggle) { 1.0 } else { 0.45 }
 
-    # 1. CPU, Frequency and CPU Temperature
+    # 1. System Uptime
+    try {
+        $ts = [TimeSpan]::FromMilliseconds([Environment]::TickCount64)
+        $script:UptimeText.Text = if ($ts.Days -gt 0) {
+            ('{0}d {1}h' -f $ts.Days, $ts.Hours)
+        } elseif ($ts.Hours -gt 0) {
+            ('{0}h {1}m' -f $ts.Hours, $ts.Minutes)
+        } else {
+            ('{0}m' -f $ts.Minutes)
+        }
+    } catch { $script:UptimeText.Text = '--' }
+
+    # 2. Top Resource Process
+    try {
+        $topProc = Get-CimInstance Win32_PerfFormattedData_PerfProc_Process -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -notmatch '_Total|Idle' } |
+            Sort-Object PercentProcessorTime -Descending |
+            Select-Object -First 1
+        if ($topProc -and $topProc.Name) {
+            $pName = $topProc.Name -replace '#\d+$',''
+            $pctVal = [math]::Round($topProc.PercentProcessorTime / $script:numCores)
+            $script:TopProcText.Text = ('Top: {0} ({1}%)' -f $pName, $pctVal)
+        } else {
+            $script:TopProcText.Text = 'Top: Idle'
+        }
+    } catch {
+        $script:TopProcText.Text = 'Top: --'
+    }
+
+    # 3. CPU, Frequency and CPU Temperature
     try {
         $cpu = (Get-CimInstance Win32_PerfFormattedData_PerfOS_Processor -Filter "Name='_Total'" -ErrorAction Stop).PercentProcessorTime
         $freq = (Get-CimInstance Win32_PerfFormattedData_Counters_ProcessorInformation -Filter "Name='_Total'" -ErrorAction Stop).ProcessorFrequency
@@ -357,7 +408,7 @@ function Update-Metrics {
         $script:ClockText.Text = '-- GHz'
     }
 
-    # 2. RAM
+    # 4. RAM
     try {
         $os = Get-CimInstance Win32_OperatingSystem -ErrorAction Stop
         $totalRam = [double]$os.TotalVisibleMemorySize * 1KB
@@ -370,7 +421,7 @@ function Update-Metrics {
         $script:RamDetailText.Text = '-- / -- GB'
     }
 
-    # 3. GPU (Utilization + VRAM - STRICTLY NO GPU TEMP)
+    # 5. GPU (Utilization + VRAM - STRICTLY NO GPU TEMP)
     try {
         $engines = Get-CimInstance Win32_PerfFormattedData_GPUPerformanceCounters_GPUEngine -ErrorAction Stop |
             Where-Object { $_.Name -match 'engtype_(3D|Compute|Graphics|VideoDecode|VideoEncode)' }
@@ -384,7 +435,7 @@ function Update-Metrics {
         $script:GpuMemText.Text = '-- GB'
     }
 
-    # 4. DISK (Activity % + Read Speed + Write Speed)
+    # 6. DISK (Activity % + Read Speed + Write Speed)
     try {
         $disk = Get-CimInstance Win32_PerfFormattedData_PerfDisk_PhysicalDisk -Filter "Name='_Total'" -ErrorAction Stop
         $diskPct = [math]::Min(100, $disk.PercentDiskTime)
@@ -397,7 +448,7 @@ function Update-Metrics {
         $script:DiskSpeedText.Text = 'R: -- | W: --'
     }
 
-    # 5. NETWORK (Real-time Upload and Download Speeds)
+    # 7. NETWORK (Real-time Upload/Download Speeds & Ping Latency)
     try {
         $now = [DateTime]::UtcNow
         $rxTotal = [int64]0
@@ -418,6 +469,20 @@ function Update-Metrics {
             } catch {}
         }
 
+        # Update Ping every 2 ticks (approx 3s)
+        if ($script:tickCounter % 2 -eq 1) {
+            try {
+                $reply = $script:pinger.Send('1.1.1.1', 350)
+                if ($reply.Status -eq [System.Net.NetworkInformation.IPStatus]::Success) {
+                    $script:cachedPing = "$($reply.RoundtripTime) ms"
+                } else {
+                    $script:cachedPing = "timeout"
+                }
+            } catch {
+                $script:cachedPing = "off"
+            }
+        }
+
         if ($null -ne $script:lastNetTime -and $script:lastNetTime -ne $now) {
             $elapsed = ($now - $script:lastNetTime).TotalSeconds
             if ($elapsed -gt 0) {
@@ -425,7 +490,7 @@ function Update-Metrics {
                 $ulRate = [math]::Max(0, ($txTotal - $script:lastTx) / $elapsed)
                 
                 $script:NetDlText.Text = ('DL: {0}' -f (Format-Rate $dlRate))
-                $script:NetUlText.Text = ('UL: {0}' -f (Format-Rate $ulRate))
+                $script:NetUlText.Text = ('UL: {0} | {1}' -f (Format-Rate $ulRate), $script:cachedPing)
             }
         }
         $script:lastRx = $rxTotal
@@ -436,7 +501,7 @@ function Update-Metrics {
         $script:NetUlText.Text = 'UL: N/A'
     }
 
-    # 6. POWER / BATTERY (Live Charging/Discharging Wattage, Battery Temp & Status)
+    # 8. POWER / BATTERY (Live Wattage, Battery Temp & Estimated Remaining Time)
     try {
         $battery = Get-CimInstance -Namespace root/wmi -ClassName BatteryStatus -ErrorAction SilentlyContinue | Select-Object -First 1
         $batteryInfo = Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -454,7 +519,16 @@ function Update-Metrics {
                 $watt = $battery.DischargeRate / 1000
                 $script:PowerRateText.Text = ('-{0:N1} W' -f $watt)
                 $script:PowerRateText.Foreground = [Windows.Media.BrushConverter]::new().ConvertFromString('#FFB86B')
-                $script:PowerDetailText.Text = "$pct% (Battery$tempSuffix)"
+                
+                # Calculate estimated remaining time
+                $remStr = ""
+                if ($battery.RemainingCapacity -gt 0) {
+                    $hoursLeft = $battery.RemainingCapacity / $battery.DischargeRate
+                    $h = [math]::Floor($hoursLeft)
+                    $m = [math]::Round(($hoursLeft - $h) * 60)
+                    $remStr = " | ${h}h ${m}m"
+                }
+                $script:PowerDetailText.Text = "$pct% (Battery$remStr$tempSuffix)"
             } elseif ($battery.PowerOnline) {
                 $script:PowerRateText.Text = "0.0 W (AC)"
                 $script:PowerRateText.Foreground = [Windows.Media.BrushConverter]::new().ConvertFromString('#68A8FF')
