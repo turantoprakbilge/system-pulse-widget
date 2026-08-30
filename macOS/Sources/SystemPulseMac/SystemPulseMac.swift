@@ -135,44 +135,137 @@ private struct SparklineClosedShape: Shape {
     }
 }
 
+private enum DashboardTab: Int, CaseIterable, Identifiable {
+    case overview = 0
+    case hardware = 1
+
+    var id: Int { rawValue }
+    var title: String {
+        switch self {
+        case .overview: return "📊 Overview"
+        case .hardware: return "⚡ Hardware & Battery"
+        }
+    }
+}
+
 private struct PulseMenu: View {
     @Bindable var monitor: SystemMonitor
+    @State private var selectedTab: DashboardTab = .overview
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 9) {
             // Header Bar
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 Image(systemName: "waveform.path.ecg")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Color.accentColor)
-                    .frame(width: 30, height: 30)
-                    .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .frame(width: 26, height: 26)
+                    .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
 
-                VStack(alignment: .leading, spacing: 1) {
+                VStack(alignment: .leading, spacing: 0) {
                     Text("System Pulse")
-                        .font(.system(size: 14, weight: .semibold))
-                    Text("Live System Performance")
-                        .font(.system(size: 10.5))
+                        .font(.system(size: 13, weight: .semibold))
+                    Text(monitor.uptime)
+                        .font(.system(size: 9.5, design: .monospaced))
                         .foregroundStyle(.secondary)
                 }
 
                 Spacer()
 
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(monitor.uptime)
-                        .foregroundStyle(.secondary)
-                        .font(.system(size: 10.5, design: .monospaced))
-                    Toggle("Auto-start", isOn: $monitor.launchAtLogin)
-                        .toggleStyle(.switch)
-                        .controlSize(.mini)
-                        .font(.system(size: 9.5))
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(monitor.sensorsAreLive ? Color.green : Color.orange)
+                        .frame(width: 5, height: 5)
+                    Text(monitor.statusText)
+                        .font(.system(size: 9))
+                        .foregroundStyle(monitor.sensorsAreLive ? Color.secondary : Color.orange)
+                }
+
+                Toggle("Auto-start", isOn: $monitor.launchAtLogin)
+                    .toggleStyle(.switch)
+                    .controlSize(.mini)
+                    .font(.system(size: 9))
+            }
+
+            // Tab Selector
+            Picker("Tab", selection: $selectedTab) {
+                ForEach(DashboardTab.allCases) { tab in
+                    Text(tab.title).tag(tab)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.segmented)
+
+            // Tab 1: Overview
+            if selectedTab == .overview {
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)], spacing: 6) {
+                    metric("CPU Usage", "\(monitor.cpuPercent)%", detail: "Clock \(monitor.cpuClock) · P: \(monitor.pcpuLoad) | E: \(monitor.ecpuLoad)", icon: "cpu", color: .blue, history: monitor.cpuHistory)
+                    metric("CPU Temp", monitor.cpuTemperature, detail: monitor.temperatureDetail, icon: "thermometer.medium", color: monitor.cpuTempColor)
+                    metric("Memory", "\(monitor.memoryPercent)%", detail: monitor.memoryDetail, icon: "memorychip", color: .green, history: monitor.memoryHistory)
+                    metric("Network", monitor.downloadRate, detail: "↑ \(monitor.uploadRate) · Ping \(monitor.pingLatency)", icon: "network", color: .pink, history: monitor.networkHistory, isPercent: false)
+                }
+
+                // Top Resource Processes
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "list.bullet.rectangle.portrait")
+                            .font(.system(size: 9.5, weight: .semibold))
+                            .foregroundStyle(Color.accentColor)
+                        Text("Top Active Processes")
+                            .font(.system(size: 9.5, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+
+                    if monitor.topProcesses.isEmpty {
+                        Text("Sampling active processes…")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.tertiary)
+                            .padding(.vertical, 1)
+                    } else {
+                        ForEach(monitor.topProcesses.prefix(3)) { proc in
+                            HStack(spacing: 6) {
+                                Text(proc.name)
+                                    .font(.system(size: 10, weight: .medium))
+                                    .lineLimit(1)
+                                Spacer(minLength: 4)
+                                Text(String(format: "%.1f%% CPU", proc.cpuPercent))
+                                    .font(.system(size: 9, design: .monospaced))
+                                    .foregroundStyle(proc.cpuPercent > 30 ? .orange : .secondary)
+                                Text(String(format: "%.1f%% RAM", proc.memPercent))
+                                    .font(.system(size: 9, design: .monospaced))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1.5)
+                            .background(Color.primary.opacity(0.03), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+                        }
+                    }
+                }
+                .padding(6)
+                .background(Color(nsColor: .controlBackgroundColor).opacity(0.8), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                }
+            } else {
+                // Tab 2: Hardware & Battery
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)], spacing: 6) {
+                    metric("Battery Level", monitor.batteryLevel, detail: "\(monitor.batteryState) · Rem: \(monitor.batteryRemaining)", icon: "battery.75percent", color: .green)
+                    metric("Battery Power", monitor.powerWatts, detail: "Current \(monitor.currentAmps) · \(monitor.powerState)", icon: "bolt.fill", color: .orange)
+                    metric("Battery Health", monitor.batteryHealth, detail: "Cycles: \(monitor.batteryCycles) · Temp: \(monitor.batteryTemp)", icon: "heart.fill", color: .red)
+                    metric("Cooling & Fans", monitor.fanSpeed, detail: "Dual Apple Silicon fans", icon: "fanblades.fill", color: .teal)
+                    metric("Internal Disk", "R \(monitor.diskReadRate)", detail: "W \(monitor.diskWriteRate) · \(monitor.diskDetail)", icon: "internaldrive", color: .cyan)
+                    metric("GPU Performance", monitor.gpuPercent, detail: "Clock \(monitor.gpuClock) · Temp \(monitor.gpuTemperature)", icon: "square.3.layers.3d", color: .purple, history: monitor.gpuHistory)
                 }
             }
 
-            // Menu Bar Display Mode Selector
+            Divider()
+
+            // Footer Configuration Bar
             HStack(spacing: 6) {
-                Text("Menu Bar:")
-                    .font(.system(size: 10.5, weight: .medium))
+                Text("Bar:")
+                    .font(.system(size: 9.5, weight: .medium))
                     .foregroundStyle(.secondary)
                 Picker("Menu Bar Mode", selection: $monitor.menuBarMode) {
                     ForEach(MenuBarMode.allCases) { mode in
@@ -181,103 +274,26 @@ private struct PulseMenu: View {
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
-            }
 
-            // 2-Column Metrics Grid
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)], spacing: 6) {
-                metric("CPU Usage", "\(monitor.cpuPercent)%", detail: "Clock \(monitor.cpuClock) · P: \(monitor.pcpuLoad) | E: \(monitor.ecpuLoad)", icon: "cpu", color: .blue, history: monitor.cpuHistory)
-                metric("CPU Temp", monitor.cpuTemperature, detail: monitor.temperatureDetail, icon: "thermometer.medium", color: monitor.cpuTempColor)
-                metric("Memory", "\(monitor.memoryPercent)%", detail: monitor.memoryDetail, icon: "memorychip", color: .green, history: monitor.memoryHistory)
-                metric("GPU Usage", monitor.gpuPercent, detail: "Clock \(monitor.gpuClock)", icon: "square.3.layers.3d", color: .purple, history: monitor.gpuHistory)
-                metric("GPU Temp", monitor.gpuTemperature, detail: "Apple Silicon SoC Thermal Zone", icon: "thermometer.medium", color: .orange)
-                metric("Network", monitor.downloadRate, detail: "↑ \(monitor.uploadRate) · Ping \(monitor.pingLatency)", icon: "network", color: .pink, history: monitor.networkHistory, isPercent: false)
-                metric("Internal Disk", "R \(monitor.diskReadRate)", detail: "W \(monitor.diskWriteRate) · \(monitor.diskDetail)", icon: "internaldrive", color: .cyan)
-                metric("Cooling & Fans", monitor.fanSpeed, detail: "Dual Apple Silicon fans", icon: "fanblades.fill", color: .teal)
-                metric("Battery Level", monitor.batteryLevel, detail: "\(monitor.batteryState) · Rem: \(monitor.batteryRemaining)", icon: "battery.75percent", color: .green)
-                metric("Battery Power", monitor.powerWatts, detail: "Current \(monitor.currentAmps) · \(monitor.powerState)", icon: "bolt.fill", color: .orange)
-                metric("Battery Health", monitor.batteryHealth, detail: "Cycles: \(monitor.batteryCycles) · Temp: \(monitor.batteryTemp)", icon: "heart.fill", color: .red)
-                metric("Refresh Interval", "\(monitor.refreshInterval)s", detail: "Sensors ≤1s · Ping 3s", icon: "arrow.clockwise", color: .indigo)
-            }
+                Spacer(minLength: 4)
 
-            // Top Active Processes Card
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 5) {
-                    Image(systemName: "list.bullet.rectangle.portrait")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(Color.accentColor)
-                    Text("Top Active Processes")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                }
-
-                if monitor.topProcesses.isEmpty {
-                    Text("Sampling active processes…")
-                        .font(.system(size: 9.5))
-                        .foregroundStyle(.tertiary)
-                        .padding(.vertical, 2)
-                } else {
-                    ForEach(monitor.topProcesses.prefix(3)) { proc in
-                        HStack(spacing: 6) {
-                            Text(proc.name)
-                                .font(.system(size: 10, weight: .medium))
-                                .lineLimit(1)
-                            Spacer(minLength: 4)
-                            Text(String(format: "%.1f%% CPU", proc.cpuPercent))
-                                .font(.system(size: 9.5, design: .monospaced))
-                                .foregroundStyle(proc.cpuPercent > 30 ? .orange : .secondary)
-                            Text(String(format: "%.1f%% RAM", proc.memPercent))
-                                .font(.system(size: 9.5, design: .monospaced))
-                                .foregroundStyle(.tertiary)
-                        }
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.primary.opacity(0.03), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
-                    }
-                }
-            }
-            .padding(8)
-            .background(Color(nsColor: .controlBackgroundColor).opacity(0.8), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
-            }
-
-            Divider()
-
-            // Footer Bar
-            HStack(spacing: 8) {
-                Label("Refresh", systemImage: "timer")
-                    .font(.system(size: 10.5))
-                    .foregroundStyle(.secondary)
-                Picker("Refresh interval", selection: $monitor.refreshInterval) {
+                Picker("Rate", selection: $monitor.refreshInterval) {
                     Text("1s").tag(1)
                     Text("2s").tag(2)
                     Text("5s").tag(5)
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
-                .frame(width: 120)
-
-                Spacer()
-
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(monitor.sensorsAreLive ? Color.green : Color.orange)
-                        .frame(width: 6, height: 6)
-                    Text(monitor.statusText)
-                        .font(.system(size: 9.5))
-                        .foregroundStyle(monitor.sensorsAreLive ? Color.secondary : Color.orange)
-                        .lineLimit(1)
-                }
+                .frame(width: 88)
 
                 Button("Quit") { NSApplication.shared.terminate(nil) }
                     .keyboardShortcut("q")
-                    .controlSize(.small)
+                    .controlSize(.mini)
+                    .font(.system(size: 9.5))
             }
         }
-        .padding(12)
-        .frame(width: 440)
+        .padding(10)
+        .frame(width: 380)
     }
 
     @ViewBuilder
@@ -290,17 +306,17 @@ private struct PulseMenu: View {
         history: [Double]? = nil,
         isPercent: Bool = true
     ) -> some View {
-        HStack(alignment: .center, spacing: 8) {
+        HStack(alignment: .center, spacing: 7) {
             Image(systemName: icon)
-                .font(.system(size: 11, weight: .bold))
+                .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(color)
-                .frame(width: 24, height: 24)
-                .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .frame(width: 22, height: 22)
+                .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
 
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 4) {
                     Text(title)
-                        .font(.system(size: 10, weight: .medium))
+                        .font(.system(size: 9.5, weight: .medium))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
 
@@ -311,31 +327,31 @@ private struct PulseMenu: View {
                             SparklineClosedShape(data: history, isPercent: isPercent)
                                 .fill(LinearGradient(colors: [color.opacity(0.25), color.opacity(0.01)], startPoint: .top, endPoint: .bottom))
                             SparklineShape(data: history, isPercent: isPercent)
-                                .stroke(color.opacity(0.9), style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
+                                .stroke(color.opacity(0.9), style: StrokeStyle(lineWidth: 1.1, lineCap: .round, lineJoin: .round))
                         }
-                        .frame(width: 36, height: 12)
+                        .frame(width: 34, height: 11)
                     }
                 }
 
                 Text(value)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.primary)
                     .monospacedDigit()
                     .lineLimit(1)
 
                 Text(detail)
-                    .font(.system(size: 9))
+                    .font(.system(size: 8.5))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
-        .background(Color(nsColor: .controlBackgroundColor).opacity(0.8), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .padding(.horizontal, 7)
+        .padding(.vertical, 5)
+        .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+        .background(Color(nsColor: .controlBackgroundColor).opacity(0.8), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
         }
     }
