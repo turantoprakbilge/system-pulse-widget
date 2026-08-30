@@ -11,40 +11,63 @@ source_file="$script_dir/Sources/SystemPulseMac/SystemPulseMac.swift"
 
 cd "$script_dir"
 
-# Apply small source-level UI/behavior patches before building.
+# Apply source patches idempotently. These replacements are intentionally
+# exact-string based so repeated builds do not fail when a patch is already present.
 /usr/bin/python3 - "$source_file" <<'PY'
 from pathlib import Path
-import re
 import sys
 
 path = Path(sys.argv[1])
 text = path.read_text(encoding="utf-8")
 
-# 1) Add All-mode rotation support exactly once.
-if "private var allModeActive = false" not in text:
-    pattern = re.compile(
-        r'(?P<indent>    )var menuBarMode: MenuBarMode \{\n'
-        r'(?P<body>.*?\n'
-        r'    \})',
-        re.S,
-    )
-    replacement = '''    private var allModeActive = false
+# 1) Footer button should route through the selection helper.
+text = text.replace(
+    "                            monitor.menuBarMode = mode\n",
+    "                            monitor.selectMenuBarMode(mode)\n",
+    1,
+)
+
+# 2) Add All-mode rotation support once.
+if "func selectMenuBarMode(_ mode: MenuBarMode)" not in text:
+    old = '''    var menuBarMode: MenuBarMode {
+        didSet {
+            UserDefaults.standard.set(menuBarMode.rawValue, forKey: Self.menuBarModeKey)
+        }
+    }
+'''
+    new = '''    private var allModeActive = false
     private var allRotationTask: Task<Void, Never>?
 
     var menuBarMode: MenuBarMode {
         didSet {
             UserDefaults.standard.set(menuBarMode.rawValue, forKey: Self.menuBarModeKey)
-            if menuBarMode == .compact && !allModeActive {
-                allModeActive = true
-                startAllModeRotation()
-            }
         }
     }
 
     func selectMenuBarMode(_ mode: MenuBarMode) {
         if mode == .compact {
             allModeActive = true
-            startAllModeRotation()
+            allRotationTask?.cancel()
+
+            let sequence: [MenuBarMode] = [.power, .cpuRam, .cpuTemp, .network]
+            menuBarMode = sequence[0]
+
+            allRotationTask = Task { @MainActor [weak self] in
+                guard let self else { return }
+                var index = 1
+
+                while self.allModeActive && !Task.isCancelled {
+                    do {
+                        try await Task.sleep(for: .seconds(5))
+                    } catch {
+                        return
+                    }
+
+                    guard self.allModeActive, !Task.isCancelled else { return }
+                    self.menuBarMode = sequence[index]
+                    index = (index + 1) % sequence.count
+                }
+            }
         } else {
             allModeActive = false
             allRotationTask?.cancel()
@@ -52,73 +75,26 @@ if "private var allModeActive = false" not in text:
             menuBarMode = mode
         }
     }
-
-    private func startAllModeRotation() {
-        allRotationTask?.cancel()
-        allRotationTask = Task { @MainActor [weak self] in
-            guard let self else { return }
-            let sequence: [MenuBarMode] = [.power, .cpuRam, .cpuTemp, .network]
-            var index = 0
-
-            while self.allModeActive && !Task.isCancelled {
-                do {
-                    try await Task.sleep(for: .seconds(5))
-                } catch {
-                    return
-                }
-                guard self.allModeActive, !Task.isCancelled else { return }
-                self.menuBarMode = sequence[index]
-                index = (index + 1) % sequence.count
-            }
-        }
-    }'''
-    text, count = pattern.subn(replacement, text, count=1)
-    if count != 1:
-        raise SystemExit("Could not locate menuBarMode property")
-
-# 2) Automatically start rotation when the app was previously left in All mode.
-if "if menuBarMode == .compact {\n            allModeActive = true\n            startAllModeRotation()" not in text:
-    init_pattern = re.compile(
-        r'(let savedMode = UserDefaults\.standard\.string\(forKey: Self\.menuBarModeKey\) \?\? ""\n'
-        r'\s*menuBarMode = MenuBarMode\(rawValue: savedMode\) \?\? \.power\n)'
-    )
-    init_replacement = r'''\1        if menuBarMode == .compact {
-            allModeActive = true
-            startAllModeRotation()
-        }
 '''
-    text, count = init_pattern.subn(init_replacement, text, count=1)
-    if count != 1:
-        raise SystemExit("Could not locate menuBarMode initialization")
+    if old not in text:
+        raise SystemExit("Could not locate SystemMonitor.menuBarMode property")
+    text = text.replace(old, new, 1)
 
-# 3) Manual mode selection must stop All-mode rotation.
-text, count = re.subn(
-    r'monitor\.menuBarMode = mode',
-    'monitor.selectMenuBarMode(mode)',
-    text,
-    count=1,
-)
-if count != 1:
-    raise SystemExit("Could not locate mode button assignment")
+# 3) Put cycle count on the Battery card.
+old_battery = '''                metric("Battery", "\\(monitor.batteryLevel) · \\(monitor.batteryHealth) Health", detail: "\\(monitor.batteryState) · Rem: \\(monitor.batteryRemaining)", icon: "battery.75percent", color: .green)
+'''
+new_battery = '''                metric("Battery", "\\(monitor.batteryLevel) · \\(monitor.batteryHealth) Health", detail: "\\(monitor.batteryState) · Rem: \\(monitor.batteryRemaining) · Cycles: \\(monitor.batteryCycles)", icon: "battery.75percent", color: .green)
+'''
+if old_battery in text:
+    text = text.replace(old_battery, new_battery, 1)
 
-# 4) Show cycle count in Battery card and avoid duplicating it in Power & Fans.
-text, count = re.subn(
-    r'metric\("Battery", "\\\(monitor\.batteryLevel\) · \\\(monitor\.batteryHealth\) Health", detail: "\\\(monitor\.batteryState\) · Rem: \\\(monitor\.batteryRemaining\)", icon: "battery\.75percent", color: \.green\)',
-    'metric("Battery", "\\(monitor.batteryLevel) · \\(monitor.batteryHealth) Health", detail: "\\(monitor.batteryState) · Rem: \\(monitor.batteryRemaining) · Cycles: \\(monitor.batteryCycles)", icon: "battery.75percent", color: .green)',
-    text,
-    count=1,
-)
-if count != 1:
-    raise SystemExit("Could not locate Battery metric")
-
-text, count = re.subn(
-    r'metric\("Power & Fans", "\\\(monitor\.powerWatts\) · \\\(monitor\.fanSpeed\)", detail: "\\\(monitor\.powerState\) · \\\(monitor\.batteryCycles\) cycles", icon: "bolt\.fill", color: \.orange\)',
-    'metric("Power & Fans", "\\(monitor.powerWatts) · \\(monitor.fanSpeed)", detail: monitor.powerState, icon: "bolt.fill", color: .orange)',
-    text,
-    count=1,
-)
-if count != 1:
-    raise SystemExit("Could not locate Power & Fans metric")
+# 4) Avoid showing cycle count twice.
+old_power = '''                metric("Power & Fans", "\\(monitor.powerWatts) · \\(monitor.fanSpeed)", detail: "\\(monitor.powerState) · \\(monitor.batteryCycles) cycles", icon: "bolt.fill", color: .orange)
+'''
+new_power = '''                metric("Power & Fans", "\\(monitor.powerWatts) · \\(monitor.fanSpeed)", detail: monitor.powerState, icon: "bolt.fill", color: .orange)
+'''
+if old_power in text:
+    text = text.replace(old_power, new_power, 1)
 
 path.write_text(text, encoding="utf-8")
 PY
