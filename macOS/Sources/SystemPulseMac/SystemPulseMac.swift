@@ -53,6 +53,7 @@ private struct PulseMenu: View {
                 metric("Internal Disk", "R \(monitor.diskReadRate)", detail: "W \(monitor.diskWriteRate) · \(monitor.diskDetail)", icon: "internaldrive", color: .cyan)
                 metric("Battery", monitor.batteryLevel, detail: monitor.batteryState, icon: "battery.75percent", color: .green)
                 metric("Battery Power", monitor.powerWatts, detail: monitor.powerState, icon: "bolt.fill", color: .orange)
+                metric("Battery Current", monitor.currentAmps, detail: monitor.powerState, icon: "arrow.left.arrow.right", color: .teal)
                 metric("Refresh", "\(monitor.refreshInterval)s", detail: "Core metrics · sensors ≤2s", icon: "arrow.clockwise", color: .indigo)
             }
 
@@ -141,6 +142,7 @@ private final class SystemMonitor {
     var batteryLevel = "--"
     var batteryState = "Reading power source…"
     var powerWatts = "Measuring…"
+    var currentAmps = "Measuring…"
     var powerState = "Reading battery sensor"
     var uptime = "Up --"
     var statusText = "Starting sensors…"
@@ -200,6 +202,7 @@ private final class SystemMonitor {
         batteryLevel = snapshot.batteryLevel
         batteryState = snapshot.batteryState
         powerWatts = snapshot.powerWatts
+        currentAmps = snapshot.currentAmps
         powerState = snapshot.powerState
         uptime = snapshot.uptime
         sensorsAreLive = snapshot.sensorsAreLive
@@ -276,6 +279,7 @@ private actor SensorCollector {
             batteryLevel: battery.level,
             batteryState: battery.state,
             powerWatts: battery.watts,
+            currentAmps: battery.current,
             powerState: battery.powerState,
             uptime: ProcessInfo.processInfo.systemUptime.formattedUptime,
             sensorsAreLive: sensorsLive,
@@ -384,7 +388,7 @@ private actor SensorCollector {
         return (diskRates.read, diskRates.written, detail)
     }
 
-    private func readBattery() -> (level: String, state: String, watts: String, powerState: String) {
+    private func readBattery() -> (level: String, state: String, watts: String, current: String, powerState: String) {
         var level = "--"
         var state = "No battery"
         if let blob = IOPSCopyPowerSourcesInfo()?.takeRetainedValue() {
@@ -399,25 +403,28 @@ private actor SensorCollector {
         }
 
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"))
-        guard service != IO_OBJECT_NULL else { return (level, state, "Unavailable", "Battery sensor unavailable") }
+        guard service != IO_OBJECT_NULL else { return (level, state, "Unavailable", "Unavailable", "Battery sensor unavailable") }
         defer { IOObjectRelease(service) }
 
         guard let currentNumber = registryNumber(service: service, key: "InstantAmperage"),
               let voltageNumber = registryNumber(service: service, key: "Voltage") else {
-            return (level, state, "Unavailable", "Battery sensor unavailable")
+            return (level, state, "Unavailable", "Unavailable", "Battery sensor unavailable")
         }
         let milliamps = Int64(bitPattern: currentNumber.uint64Value)
         let millivolts = voltageNumber.doubleValue
         let watts = batteryPowerWatts(milliamps: milliamps, millivolts: millivolts)
         let external = registryNumber(service: service, key: "ExternalConnected")?.boolValue ?? false
         let formatted = abs(watts) < 0.05 ? "0.0 W" : String(format: "%@%.1f W", watts > 0 ? "+" : "−", abs(watts))
+        let formattedCurrent = abs(milliamps) >= 1_000
+            ? String(format: "%@%.2f A", milliamps >= 0 ? "+" : "−", abs(Double(milliamps)) / 1_000)
+            : String(format: "%@%lld mA", milliamps >= 0 ? "+" : "−", abs(milliamps))
         let voltage = String(format: "%.2f V", millivolts / 1_000)
         let powerState: String
         if watts > 0.2 { powerState = "Charging · \(voltage)" }
         else if watts < -0.2 { powerState = "Discharging · \(voltage)" }
         else if external { powerState = "Plugged in · battery idle" }
         else { powerState = "Battery idle · \(voltage)" }
-        return (level, state, formatted, powerState)
+        return (level, state, formatted, formattedCurrent, powerState)
     }
 
     private func fallbackCPUUsage() -> Int {
@@ -597,6 +604,7 @@ private struct SensorSnapshot: Sendable {
     let batteryLevel: String
     let batteryState: String
     let powerWatts: String
+    let currentAmps: String
     let powerState: String
     let uptime: String
     let sensorsAreLive: Bool
