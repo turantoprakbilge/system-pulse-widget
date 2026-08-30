@@ -11,29 +11,30 @@ source_file="$script_dir/Sources/SystemPulseMac/SystemPulseMac.swift"
 
 cd "$script_dir"
 
-# Apply small source-level UI/behavior patches before building. Keeping these
-# transformations here lets the checked-in app source stay readable while the
-# local build always contains the current UI behavior.
+# Apply small source-level UI/behavior patches before building.
 /usr/bin/python3 - "$source_file" <<'PY'
 from pathlib import Path
+import re
 import sys
 
 path = Path(sys.argv[1])
 text = path.read_text(encoding="utf-8")
 
-old_property = '''    var menuBarMode: MenuBarMode {
-        didSet {
-            UserDefaults.standard.set(menuBarMode.rawValue, forKey: Self.menuBarModeKey)
-        }
-    }
-'''
-new_property = '''    private var allModeActive = false
+# 1) Add All-mode rotation support exactly once.
+if "private var allModeActive = false" not in text:
+    pattern = re.compile(
+        r'(?P<indent>    )var menuBarMode: MenuBarMode \{\n'
+        r'(?P<body>.*?\n'
+        r'    \})',
+        re.S,
+    )
+    replacement = '''    private var allModeActive = false
     private var allRotationTask: Task<Void, Never>?
 
     var menuBarMode: MenuBarMode {
         didSet {
             UserDefaults.standard.set(menuBarMode.rawValue, forKey: Self.menuBarModeKey)
-            if menuBarMode == .compact {
+            if menuBarMode == .compact && !allModeActive {
                 allModeActive = true
                 startAllModeRotation()
             }
@@ -43,7 +44,7 @@ new_property = '''    private var allModeActive = false
     func selectMenuBarMode(_ mode: MenuBarMode) {
         if mode == .compact {
             allModeActive = true
-            menuBarMode = .compact
+            startAllModeRotation()
         } else {
             allModeActive = false
             allRotationTask?.cancel()
@@ -70,51 +71,54 @@ new_property = '''    private var allModeActive = false
                 index = (index + 1) % sequence.count
             }
         }
-    }
-'''
-if old_property not in text:
-    raise SystemExit("menuBarMode block not found")
-text = text.replace(old_property, new_property, 1)
+    }'''
+    text, count = pattern.subn(replacement, text, count=1)
+    if count != 1:
+        raise SystemExit("Could not locate menuBarMode property")
 
-old_init = '''        menuBarMode = MenuBarMode(rawValue: savedMode) ?? .power
-
-        restartMonitoring()
-'''
-new_init = '''        menuBarMode = MenuBarMode(rawValue: savedMode) ?? .power
-        if menuBarMode == .compact {
+# 2) Automatically start rotation when the app was previously left in All mode.
+if "if menuBarMode == .compact {\n            allModeActive = true\n            startAllModeRotation()" not in text:
+    init_pattern = re.compile(
+        r'(let savedMode = UserDefaults\.standard\.string\(forKey: Self\.menuBarModeKey\) \?\? ""\n'
+        r'\s*menuBarMode = MenuBarMode\(rawValue: savedMode\) \?\? \.power\n)'
+    )
+    init_replacement = r'''\1        if menuBarMode == .compact {
             allModeActive = true
             startAllModeRotation()
         }
+'''
+    text, count = init_pattern.subn(init_replacement, text, count=1)
+    if count != 1:
+        raise SystemExit("Could not locate menuBarMode initialization")
 
-        restartMonitoring()
-'''
-if old_init not in text:
-    raise SystemExit("init block not found")
-text = text.replace(old_init, new_init, 1)
+# 3) Manual mode selection must stop All-mode rotation.
+text, count = re.subn(
+    r'monitor\.menuBarMode = mode',
+    'monitor.selectMenuBarMode(mode)',
+    text,
+    count=1,
+)
+if count != 1:
+    raise SystemExit("Could not locate mode button assignment")
 
-old_button = '''                            monitor.menuBarMode = mode
-'''
-new_button = '''                            monitor.selectMenuBarMode(mode)
-'''
-if old_button not in text:
-    raise SystemExit("mode button assignment not found")
-text = text.replace(old_button, new_button, 1)
+# 4) Show cycle count in Battery card and avoid duplicating it in Power & Fans.
+text, count = re.subn(
+    r'metric\("Battery", "\\\(monitor\.batteryLevel\) · \\\(monitor\.batteryHealth\) Health", detail: "\\\(monitor\.batteryState\) · Rem: \\\(monitor\.batteryRemaining\)", icon: "battery\.75percent", color: \.green\)',
+    'metric("Battery", "\\(monitor.batteryLevel) · \\(monitor.batteryHealth) Health", detail: "\\(monitor.batteryState) · Rem: \\(monitor.batteryRemaining) · Cycles: \\(monitor.batteryCycles)", icon: "battery.75percent", color: .green)',
+    text,
+    count=1,
+)
+if count != 1:
+    raise SystemExit("Could not locate Battery metric")
 
-old_battery = '''metric("Battery", "\\(monitor.batteryLevel) · \\(monitor.batteryHealth) Health", detail: "\\(monitor.batteryState) · Rem: \\(monitor.batteryRemaining)", icon: "battery.75percent", color: .green)
-'''
-new_battery = '''metric("Battery", "\\(monitor.batteryLevel) · \\(monitor.batteryHealth) Health", detail: "\\(monitor.batteryState) · Rem: \\(monitor.batteryRemaining) · Cycles: \\(monitor.batteryCycles)", icon: "battery.75percent", color: .green)
-'''
-if old_battery not in text:
-    raise SystemExit("battery metric line not found")
-text = text.replace(old_battery, new_battery, 1)
-
-old_power_detail = '''metric("Power & Fans", "\\(monitor.powerWatts) · \\(monitor.fanSpeed)", detail: "\\(monitor.powerState) · \\(monitor.batteryCycles) cycles", icon: "bolt.fill", color: .orange)
-'''
-new_power_detail = '''metric("Power & Fans", "\\(monitor.powerWatts) · \\(monitor.fanSpeed)", detail: monitor.powerState, icon: "bolt.fill", color: .orange)
-'''
-if old_power_detail not in text:
-    raise SystemExit("power metric line not found")
-text = text.replace(old_power_detail, new_power_detail, 1)
+text, count = re.subn(
+    r'metric\("Power & Fans", "\\\(monitor\.powerWatts\) · \\\(monitor\.fanSpeed\)", detail: "\\\(monitor\.powerState\) · \\\(monitor\.batteryCycles\) cycles", icon: "bolt\.fill", color: \.orange\)',
+    'metric("Power & Fans", "\\(monitor.powerWatts) · \\(monitor.fanSpeed)", detail: monitor.powerState, icon: "bolt.fill", color: .orange)',
+    text,
+    count=1,
+)
+if count != 1:
+    raise SystemExit("Could not locate Power & Fans metric")
 
 path.write_text(text, encoding="utf-8")
 PY
