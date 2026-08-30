@@ -1,12 +1,17 @@
 # System Pulse Widget
 
-## macOS edition (new)
+## macOS edition (v2.0)
 
-`macOS/` contains a native Apple-silicon-friendly menu-bar app, tested for this
-MacBook Pro (M2 Pro, 16 GB). It continuously tracks CPU/GPU load, clock and
-temperature, memory, internal-disk read/write speed, network upload/download,
-battery state, charge/discharge wattage, and uptime. It does not require
-administrator rights.
+`macOS/` contains a native Apple-silicon-optimized menu-bar application for macOS 14+. It does not require administrator rights and features:
+
+- **Customizable Menu Bar Modes:** Choose between `Power (W/A)`, `CPU/RAM`, `CPU/Temp`, `Network (↓/↑)`, or `All-in-One Compact`.
+- **Live Sparkline Charts:** Real-time smooth trend graphs for CPU, RAM, GPU, and Network activity.
+- **Top Resource Processes:** Live monitoring of top 4 CPU & Memory consumer applications.
+- **CPU & GPU Telemetry:** Overall load, clock frequencies, P-Core & E-Core breakdown, and unified SoC temperature.
+- **Fan & Cooling Monitor:** Real-time RPM tracking for dual Apple Silicon cooling fans.
+- **Battery Diagnostics:** Live wattage (charge/discharge), amperage, estimated remaining time, battery health percentage, cycle count, and temperature.
+- **Network & Ping:** Anonymized throughput (↓ / ↑) and live ping latency.
+- **Launch at Login:** Built-in auto-start toggle powered by `ServiceManagement`.
 
 Install it as a regular macOS app (appears in Applications and Launchpad):
 
@@ -22,14 +27,8 @@ cd macOS
 ./build-and-run.sh
 ```
 
-The app appears in the menu bar with live CPU/RAM usage. Click it for the full
-dashboard and choose a 1, 2, or 5 second refresh interval. Private Apple Silicon
-sensors are sampled continuously at 1 second; the dashboard follows the selected
-refresh interval while keeping the latest valid temperature sample.
+Building requires `macmon` (`brew install macmon`). The installer bundles the MIT-licensed helper inside the app, so the installed `.app` has no runtime dependency on Homebrew.
 
-Building requires `macmon` (`brew install macmon`). The installer bundles the
-MIT-licensed helper inside the app, so the installed `.app` has no Homebrew
-runtime dependency.
 
 A lightweight, modern, real-time hardware and system monitor designed for Windows 10/11 taskbars.
 

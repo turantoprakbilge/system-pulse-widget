@@ -1,3 +1,0 @@
-module SystemPulseMacPackageTests {
-    header "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/debug/SystemPulseMacPackageTests.build/include/SystemPulseMacPackageTests-Swift.h"
-}
