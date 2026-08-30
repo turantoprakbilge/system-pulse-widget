@@ -172,6 +172,7 @@ private struct PulseMenu: View {
                     .controlSize(.mini)
                     .font(.system(size: 9.5))
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             // 8 Primary Metrics (4 rows x 2 columns)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)], spacing: 6) {
@@ -184,6 +185,7 @@ private struct PulseMenu: View {
                 metric("Battery", "\(monitor.batteryLevel) · \(monitor.batteryHealth) Health", detail: "\(monitor.batteryState) · Rem: \(monitor.batteryRemaining)", icon: "battery.75percent", color: .green)
                 metric("Power & Fans", "\(monitor.powerWatts) · \(monitor.fanSpeed)", detail: "\(monitor.powerState) · \(monitor.batteryCycles) cycles", icon: "bolt.fill", color: .orange)
             }
+            .frame(maxWidth: .infinity)
 
             // Top Processes Strip
             if !monitor.topProcesses.isEmpty {
@@ -199,9 +201,11 @@ private struct PulseMenu: View {
                             .font(.system(size: 9.5, design: .monospaced))
                             .foregroundStyle(proc.cpuPercent > 30 ? .orange : .secondary)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.75)
                     }
-                    Spacer()
+                    Spacer(minLength: 0)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
                 .background(Color(nsColor: .controlBackgroundColor).opacity(0.8), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
@@ -213,11 +217,10 @@ private struct PulseMenu: View {
 
             Divider()
 
-            // Footer Controls
-            HStack(spacing: 6) {
-                Text("Bar:")
-                    .font(.system(size: 9.5, weight: .medium))
-                    .foregroundStyle(.secondary)
+            // Footer Controls. Keep the wide 5-segment mode picker on its own row;
+            // placing it beside refresh + quit forces the popover's intrinsic width
+            // beyond 420 pt and causes the entire dashboard to render off-center.
+            VStack(spacing: 6) {
                 Picker("Menu Bar Mode", selection: $monitor.menuBarMode) {
                     ForEach(MenuBarMode.allCases) { mode in
                         Text(mode.title).tag(mode)
@@ -225,26 +228,34 @@ private struct PulseMenu: View {
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
+                .frame(maxWidth: .infinity)
 
-                Spacer(minLength: 4)
+                HStack(spacing: 6) {
+                    Text("Refresh")
+                        .font(.system(size: 9.5, weight: .medium))
+                        .foregroundStyle(.secondary)
 
-                Picker("Rate", selection: $monitor.refreshInterval) {
-                    Text("1s").tag(1)
-                    Text("2s").tag(2)
-                    Text("5s").tag(5)
+                    Picker("Rate", selection: $monitor.refreshInterval) {
+                        Text("1s").tag(1)
+                        Text("2s").tag(2)
+                        Text("5s").tag(5)
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
+                    .frame(width: 88)
+
+                    Spacer(minLength: 0)
+
+                    Button("Quit") { NSApplication.shared.terminate(nil) }
+                        .keyboardShortcut("q")
+                        .controlSize(.mini)
+                        .font(.system(size: 9.5))
                 }
-                .labelsHidden()
-                .pickerStyle(.segmented)
-                .frame(width: 88)
-
-                Button("Quit") { NSApplication.shared.terminate(nil) }
-                    .keyboardShortcut("q")
-                    .controlSize(.mini)
-                    .font(.system(size: 9.5))
             }
+            .frame(maxWidth: .infinity)
         }
+        .frame(width: 400, alignment: .leading)
         .padding(10)
-        .frame(width: 420)
     }
 
     @ViewBuilder
@@ -1070,4 +1081,3 @@ private extension TimeInterval {
         return days > 0 ? "Up \(days)d \(hours)h" : "Up \(hours)h"
     }
 }
-
