@@ -12,7 +12,18 @@ struct SystemPulseMacApp: App {
         MenuBarExtra {
             PulseMenu(monitor: monitor)
         } label: {
-            Label("CPU \(monitor.cpuPercent)% · RAM \(monitor.memoryPercent)%", systemImage: "waveform.path.ecg")
+            HStack(spacing: 6) {
+                Image(systemName: "waveform.path.ecg")
+                Text("CPU \(monitor.cpuPercent)% · RAM \(monitor.memoryPercent)%")
+                Text("·")
+                    .foregroundStyle(.secondary)
+                Image(systemName: "bolt.fill")
+                    .foregroundStyle(.orange)
+                Text(monitor.powerWatts)
+                Text(monitor.currentAmps)
+            }
+            .font(.system(size: 12, weight: .medium))
+            .monospacedDigit()
         }
         .menuBarExtraStyle(.window)
     }
