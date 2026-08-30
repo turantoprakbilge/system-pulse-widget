@@ -84,51 +84,54 @@ struct SystemPulseMacApp: App {
     }
 }
 
-private struct SparklineView: View {
+private struct SparklineShape: Shape {
     let data: [Double]
-    let color: Color
     var isPercent: Bool = true
 
-    var body: some View {
-        GeometryReader { geo in
-            if data.count > 1 {
-                let maxVal = isPercent ? 100.0 : max(1.0, data.max() ?? 1.0)
-                let minVal = 0.0
-                let points = data.indices.map { i -> CGPoint in
-                    let x = geo.size.width * CGFloat(i) / CGFloat(data.count - 1)
-                    let ratio = CGFloat((data[i] - minVal) / max(1.0, maxVal - minVal))
-                    let clampedRatio = min(max(ratio, 0.0), 1.0)
-                    let y = geo.size.height * (1.0 - clampedRatio)
-                    return CGPoint(x: x, y: y)
-                }
-
-                Path { path in
-                    path.move(to: points[0])
-                    for pt in points.dropFirst() {
-                        path.addLine(to: pt)
-                    }
-                }
-                .stroke(color.opacity(0.85), style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
-
-                Path { path in
-                    path.move(to: CGPoint(x: points[0].x, y: geo.size.height))
-                    path.addLine(to: points[0])
-                    for pt in points.dropFirst() {
-                        path.addLine(to: pt)
-                    }
-                    path.addLine(to: CGPoint(x: points.last!.x, y: geo.size.height))
-                    path.closeSubpath()
-                }
-                .fill(
-                    LinearGradient(
-                        colors: [color.opacity(0.22), color.opacity(0.01)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-            }
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        guard data.count > 1, rect.width > 0, rect.height > 0 else { return path }
+        let maxVal = isPercent ? 100.0 : max(1.0, data.max() ?? 1.0)
+        let minVal = 0.0
+        let points = data.indices.map { i -> CGPoint in
+            let x = rect.width * CGFloat(i) / CGFloat(data.count - 1)
+            let ratio = CGFloat((data[i] - minVal) / max(1.0, maxVal - minVal))
+            let clampedRatio = min(max(ratio, 0.0), 1.0)
+            let y = rect.height * (1.0 - clampedRatio)
+            return CGPoint(x: x, y: y)
         }
-        .frame(height: 18)
+        path.move(to: points[0])
+        for pt in points.dropFirst() {
+            path.addLine(to: pt)
+        }
+        return path
+    }
+}
+
+private struct SparklineClosedShape: Shape {
+    let data: [Double]
+    var isPercent: Bool = true
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        guard data.count > 1, rect.width > 0, rect.height > 0 else { return path }
+        let maxVal = isPercent ? 100.0 : max(1.0, data.max() ?? 1.0)
+        let minVal = 0.0
+        let points = data.indices.map { i -> CGPoint in
+            let x = rect.width * CGFloat(i) / CGFloat(data.count - 1)
+            let ratio = CGFloat((data[i] - minVal) / max(1.0, maxVal - minVal))
+            let clampedRatio = min(max(ratio, 0.0), 1.0)
+            let y = rect.height * (1.0 - clampedRatio)
+            return CGPoint(x: x, y: y)
+        }
+        path.move(to: CGPoint(x: points[0].x, y: rect.height))
+        path.addLine(to: points[0])
+        for pt in points.dropFirst() {
+            path.addLine(to: pt)
+        }
+        path.addLine(to: CGPoint(x: points.last!.x, y: rect.height))
+        path.closeSubpath()
+        return path
     }
 }
 
@@ -136,113 +139,128 @@ private struct PulseMenu: View {
     @Bindable var monitor: SystemMonitor
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            // Header
+        VStack(spacing: 0) {
+            // Header Bar
             HStack(spacing: 10) {
                 Image(systemName: "waveform.path.ecg")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.accentColor)
-                    .frame(width: 34, height: 34)
-                    .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                    .frame(width: 32, height: 32)
+                    .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+
                 VStack(alignment: .leading, spacing: 1) {
                     Text("System Pulse")
-                        .font(.headline)
-                    Text("Mac performance & system monitor")
-                        .font(.caption)
+                        .font(.system(size: 14, weight: .semibold))
+                    Text("Live System Performance")
+                        .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 }
+
                 Spacer()
+
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(monitor.uptime)
                         .foregroundStyle(.secondary)
-                        .font(.caption)
-                        .monospacedDigit()
+                        .font(.system(size: 11, design: .monospaced))
                     Toggle("Auto-start", isOn: $monitor.launchAtLogin)
                         .toggleStyle(.switch)
                         .controlSize(.mini)
-                        .font(.caption2)
+                        .font(.system(size: 10))
                 }
             }
-
-            // Menu bar display mode picker
-            HStack(spacing: 8) {
-                Text("Menu Bar:")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
-                Picker("Menu Bar Mode", selection: $monitor.menuBarMode) {
-                    ForEach(MenuBarMode.allCases) { mode in
-                        Text(mode.title).tag(mode)
-                    }
-                }
-                .labelsHidden()
-                .pickerStyle(.segmented)
-            }
-
-            // Primary Metrics Grid
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())], alignment: .leading, spacing: 10) {
-                metric("CPU Usage", "\(monitor.cpuPercent)%", detail: "Clock \(monitor.cpuClock) · P: \(monitor.pcpuLoad) | E: \(monitor.ecpuLoad)", icon: "cpu", color: .blue, history: monitor.cpuHistory)
-                metric("CPU Temperature", monitor.cpuTemperature, detail: monitor.temperatureDetail, icon: "thermometer.medium", color: monitor.cpuTempColor)
-                metric("Memory", "\(monitor.memoryPercent)%", detail: monitor.memoryDetail, icon: "memorychip", color: .green, history: monitor.memoryHistory)
-                metric("GPU Usage", monitor.gpuPercent, detail: "Clock \(monitor.gpuClock)", icon: "square.3.layers.3d", color: .purple, history: monitor.gpuHistory)
-                metric("GPU Temperature", monitor.gpuTemperature, detail: "Apple Silicon SoC Thermal Zone", icon: "thermometer.medium", color: .orange)
-                metric("Network", monitor.downloadRate, detail: "↑ \(monitor.uploadRate) · Ping \(monitor.pingLatency)", icon: "network", color: .pink, history: monitor.networkHistory, isPercent: false)
-                metric("Internal Disk", "R \(monitor.diskReadRate)", detail: "W \(monitor.diskWriteRate) · \(monitor.diskDetail)", icon: "internaldrive", color: .cyan)
-                metric("Cooling & Fans", monitor.fanSpeed, detail: "Dual Apple Silicon fans", icon: "fanblades.fill", color: .teal)
-                metric("Battery Level", monitor.batteryLevel, detail: "\(monitor.batteryState) · Rem: \(monitor.batteryRemaining)", icon: "battery.75percent", color: .green)
-                metric("Battery Power", monitor.powerWatts, detail: "Current \(monitor.currentAmps) · \(monitor.powerState)", icon: "bolt.fill", color: .orange)
-                metric("Battery Health", monitor.batteryHealth, detail: "Cycles: \(monitor.batteryCycles) · Temp: \(monitor.batteryTemp)", icon: "heart.fill", color: .red)
-                metric("Refresh Rate", "\(monitor.refreshInterval)s", detail: "Live sensors ≤1s · Ping 3s", icon: "arrow.clockwise", color: .indigo)
-            }
-
-            // Top Processes Section
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Image(systemName: "list.bullet.rectangle.portrait")
-                        .foregroundStyle(Color.accentColor)
-                    Text("Top Resource Processes")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                }
-
-                if monitor.topProcesses.isEmpty {
-                    Text("Sampling active processes…")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .padding(.vertical, 4)
-                } else {
-                    ForEach(monitor.topProcesses) { proc in
-                        HStack(spacing: 8) {
-                            Text(proc.name)
-                                .font(.caption.weight(.medium))
-                                .lineLimit(1)
-                            Spacer()
-                            Text(String(format: "%.1f%% CPU", proc.cpuPercent))
-                                .font(.caption2.monospacedDigit())
-                                .foregroundStyle(proc.cpuPercent > 30 ? .orange : .secondary)
-                            Text(String(format: "%.1f%% RAM", proc.memPercent))
-                                .font(.caption2.monospacedDigit())
-                                .foregroundStyle(.tertiary)
-                        }
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
-                    }
-                }
-            }
-            .padding(10)
-            .background(Color(nsColor: .controlBackgroundColor).opacity(0.72), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
-            }
+            .padding(.horizontal, 14)
+            .padding(.top, 12)
+            .padding(.bottom, 10)
 
             Divider()
 
-            // Footer controls
-            HStack(spacing: 12) {
+            // Scrollable Content Body
+            ScrollView(.vertical, showsIndicators: true) {
+                VStack(alignment: .leading, spacing: 12) {
+                    // Menu Bar Mode Selector
+                    HStack(spacing: 8) {
+                        Text("Menu Bar:")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(.secondary)
+                        Picker("Menu Bar Mode", selection: $monitor.menuBarMode) {
+                            ForEach(MenuBarMode.allCases) { mode in
+                                Text(mode.title).tag(mode)
+                            }
+                        }
+                        .labelsHidden()
+                        .pickerStyle(.segmented)
+                    }
+
+                    // 2-Column Metrics Grid
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
+                        metric("CPU Usage", "\(monitor.cpuPercent)%", detail: "Clock \(monitor.cpuClock) · P: \(monitor.pcpuLoad) | E: \(monitor.ecpuLoad)", icon: "cpu", color: .blue, history: monitor.cpuHistory)
+                        metric("CPU Temp", monitor.cpuTemperature, detail: monitor.temperatureDetail, icon: "thermometer.medium", color: monitor.cpuTempColor)
+                        metric("Memory", "\(monitor.memoryPercent)%", detail: monitor.memoryDetail, icon: "memorychip", color: .green, history: monitor.memoryHistory)
+                        metric("GPU Usage", monitor.gpuPercent, detail: "Clock \(monitor.gpuClock)", icon: "square.3.layers.3d", color: .purple, history: monitor.gpuHistory)
+                        metric("GPU Temp", monitor.gpuTemperature, detail: "Apple Silicon SoC Thermal Zone", icon: "thermometer.medium", color: .orange)
+                        metric("Network", monitor.downloadRate, detail: "↑ \(monitor.uploadRate) · Ping \(monitor.pingLatency)", icon: "network", color: .pink, history: monitor.networkHistory, isPercent: false)
+                        metric("Internal Disk", "R \(monitor.diskReadRate)", detail: "W \(monitor.diskWriteRate) · \(monitor.diskDetail)", icon: "internaldrive", color: .cyan)
+                        metric("Cooling & Fans", monitor.fanSpeed, detail: "Dual Apple Silicon fans", icon: "fanblades.fill", color: .teal)
+                        metric("Battery Level", monitor.batteryLevel, detail: "\(monitor.batteryState) · Rem: \(monitor.batteryRemaining)", icon: "battery.75percent", color: .green)
+                        metric("Battery Power", monitor.powerWatts, detail: "Current \(monitor.currentAmps) · \(monitor.powerState)", icon: "bolt.fill", color: .orange)
+                        metric("Battery Health", monitor.batteryHealth, detail: "Cycles: \(monitor.batteryCycles) · Temp: \(monitor.batteryTemp)", icon: "heart.fill", color: .red)
+                        metric("Refresh Interval", "\(monitor.refreshInterval)s", detail: "Sensors ≤1s · Ping 3s", icon: "arrow.clockwise", color: .indigo)
+                    }
+
+                    // Top Active Processes Card
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "list.bullet.rectangle.portrait")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(Color.accentColor)
+                            Text("Top Resource Processes")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                        }
+
+                        if monitor.topProcesses.isEmpty {
+                            Text("Sampling active processes…")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.tertiary)
+                                .padding(.vertical, 4)
+                        } else {
+                            ForEach(monitor.topProcesses) { proc in
+                                HStack(spacing: 8) {
+                                    Text(proc.name)
+                                        .font(.system(size: 11, weight: .medium))
+                                        .lineLimit(1)
+                                    Spacer(minLength: 4)
+                                    Text(String(format: "%.1f%% CPU", proc.cpuPercent))
+                                        .font(.system(size: 10, design: .monospaced))
+                                        .foregroundStyle(proc.cpuPercent > 30 ? .orange : .secondary)
+                                    Text(String(format: "%.1f%% RAM", proc.memPercent))
+                                        .font(.system(size: 10, design: .monospaced))
+                                        .foregroundStyle(.tertiary)
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            }
+                        }
+                    }
+                    .padding(10)
+                    .background(Color(nsColor: .controlBackgroundColor).opacity(0.72), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                    }
+                }
+                .padding(12)
+            }
+            .frame(maxHeight: 520)
+
+            Divider()
+
+            // Fixed Footer Bar
+            HStack(spacing: 10) {
                 Label("Refresh", systemImage: "timer")
-                    .font(.caption)
+                    .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                 Picker("Refresh interval", selection: $monitor.refreshInterval) {
                     Text("1s").tag(1)
@@ -251,16 +269,16 @@ private struct PulseMenu: View {
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
-                .frame(width: 140)
+                .frame(width: 130)
 
                 Spacer()
 
                 HStack(spacing: 5) {
                     Circle()
                         .fill(monitor.sensorsAreLive ? Color.green : Color.orange)
-                        .frame(width: 7, height: 7)
+                        .frame(width: 6, height: 6)
                     Text(monitor.statusText)
-                        .font(.caption2)
+                        .font(.system(size: 10))
                         .foregroundStyle(monitor.sensorsAreLive ? Color.secondary : Color.orange)
                         .lineLimit(1)
                 }
@@ -269,9 +287,10 @@ private struct PulseMenu: View {
                     .keyboardShortcut("q")
                     .controlSize(.small)
             }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
         }
-        .padding(14)
-        .frame(width: 460)
+        .frame(width: 480)
     }
 
     @ViewBuilder
@@ -284,37 +303,52 @@ private struct PulseMenu: View {
         history: [Double]? = nil,
         isPercent: Bool = true
     ) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(color)
-                .frame(width: 28, height: 28)
-                .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
-            VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .center, spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(color)
+                    .frame(width: 20, height: 20)
+                    .background(color.opacity(0.14), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+
                 Text(title)
-                    .font(.caption)
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
-                Text(value)
-                    .font(.system(.title3, design: .rounded, weight: .semibold))
-                    .monospacedDigit()
                     .lineLimit(1)
+
+                Spacer(minLength: 4)
 
                 if let history, history.count > 1 {
-                    SparklineView(data: history, color: color, isPercent: isPercent)
+                    ZStack {
+                        SparklineClosedShape(data: history, isPercent: isPercent)
+                            .fill(LinearGradient(colors: [color.opacity(0.25), color.opacity(0.01)], startPoint: .top, endPoint: .bottom))
+                        SparklineShape(data: history, isPercent: isPercent)
+                            .stroke(color.opacity(0.9), style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
+                    }
+                    .frame(width: 44, height: 14)
                 }
-
-                Text(detail)
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .lineLimit(1)
             }
+
+            Text(value)
+                .font(.system(size: 17, weight: .bold, design: .rounded))
+                .foregroundStyle(Color.primary)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .padding(.top, 1)
+
+            Text(detail)
+                .font(.system(size: 9.5))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .truncationMode(.tail)
         }
-        .padding(10)
-        .frame(maxWidth: .infinity, minHeight: 82, alignment: .topLeading)
-        .background(Color(nsColor: .controlBackgroundColor).opacity(0.72), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .padding(8)
+        .frame(maxWidth: .infinity, minHeight: 70, alignment: .topLeading)
+        .background(Color(nsColor: .controlBackgroundColor).opacity(0.78), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(Color.primary.opacity(0.07), lineWidth: 0.5)
         }
     }
 }
