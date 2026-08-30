@@ -16,11 +16,21 @@ public enum MenuBarMode: String, CaseIterable, Identifiable {
 
     public var title: String {
         switch self {
-        case .power: return "⚡ Power"
-        case .cpuRam: return "􀧓 CPU/RAM"
-        case .cpuTemp: return "􀇬 CPU/Temp"
-        case .network: return "􀤆 Network"
-        case .compact: return "🌟 All-in-One"
+        case .power: return "Power"
+        case .cpuRam: return "CPU/RAM"
+        case .cpuTemp: return "CPU/Temp"
+        case .network: return "Network"
+        case .compact: return "All"
+        }
+    }
+
+    public var symbolName: String {
+        switch self {
+        case .power: return "bolt.fill"
+        case .cpuRam: return "cpu"
+        case .cpuTemp: return "thermometer.medium"
+        case .network: return "network"
+        case .compact: return "square.grid.2x2.fill"
         }
     }
 }
@@ -140,7 +150,6 @@ private struct PulseMenu: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Header Bar
             HStack(spacing: 8) {
                 Image(systemName: "waveform.path.ecg")
                     .font(.system(size: 14, weight: .semibold))
@@ -174,7 +183,6 @@ private struct PulseMenu: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            // 8 Primary Metrics (4 rows x 2 columns)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)], spacing: 6) {
                 metric("CPU Usage", "\(monitor.cpuPercent)%", detail: "Clock \(monitor.cpuClock) · P: \(monitor.pcpuLoad) | E: \(monitor.ecpuLoad)", icon: "cpu", color: .blue, history: monitor.cpuHistory)
                 metric("CPU Temp", monitor.cpuTemperature, detail: monitor.temperatureDetail, icon: "thermometer.medium", color: monitor.cpuTempColor)
@@ -187,7 +195,6 @@ private struct PulseMenu: View {
             }
             .frame(maxWidth: .infinity)
 
-            // Top Processes Strip
             if !monitor.topProcesses.isEmpty {
                 HStack(spacing: 6) {
                     Image(systemName: "list.bullet.rectangle.portrait")
@@ -217,18 +224,35 @@ private struct PulseMenu: View {
 
             Divider()
 
-            // Footer Controls. Keep the wide 5-segment mode picker on its own row;
-            // placing it beside refresh + quit forces the popover's intrinsic width
-            // beyond 420 pt and causes the entire dashboard to render off-center.
             VStack(spacing: 6) {
-                Picker("Menu Bar Mode", selection: $monitor.menuBarMode) {
+                HStack(spacing: 4) {
                     ForEach(MenuBarMode.allCases) { mode in
-                        Text(mode.title).tag(mode)
+                        Button {
+                            monitor.menuBarMode = mode
+                        } label: {
+                            HStack(spacing: 3) {
+                                Image(systemName: mode.symbolName)
+                                    .font(.system(size: 9, weight: .semibold))
+                                Text(mode.title)
+                                    .font(.system(size: 8.5, weight: .medium))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.75)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 5)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(monitor.menuBarMode == mode ? Color.white : Color.primary)
+                        .background(
+                            monitor.menuBarMode == mode ? Color.accentColor : Color.clear,
+                            in: RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        )
                     }
                 }
-                .labelsHidden()
-                .pickerStyle(.segmented)
                 .frame(maxWidth: .infinity)
+                .padding(2)
+                .background(Color.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
 
                 HStack(spacing: 6) {
                     Text("Refresh")
@@ -467,7 +491,6 @@ private final class SystemMonitor {
         statusText = snapshot.statusText
         topProcesses = snapshot.topProcesses
 
-        // Update rolling sparkline histories (keep max 20 samples)
         cpuHistory.append(Double(snapshot.cpuPercent))
         if cpuHistory.count > 20 { cpuHistory.removeFirst() }
 
@@ -517,7 +540,6 @@ private actor SensorCollector {
             lastMacmonTimestamp = reading.metrics.timestamp
             recordTemperatures(reading.metrics.temp, at: reading.receivedAt)
         }
-
         let cpu = cpuValues(from: sensorsLive ? reading?.metrics : nil)
         let memory = memoryValues()
         let gpu = gpuValues(from: sensorsLive ? reading?.metrics : nil)
