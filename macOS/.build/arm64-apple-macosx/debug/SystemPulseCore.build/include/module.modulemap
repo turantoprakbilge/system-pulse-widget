@@ -1,0 +1,3 @@
+module SystemPulseCore {
+    header "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/debug/SystemPulseCore.build/include/SystemPulseCore-Swift.h"
+}

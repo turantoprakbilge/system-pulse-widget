@@ -1,0 +1,13 @@
+{
+  "": {
+    "dependencies": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacPackageTests.build/SystemPulseMacPackageTests.d",
+    "object": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacPackageTests.build/SystemPulseMacPackageTests.o",
+    "swift-dependencies": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacPackageTests.build/primary.swiftdeps"
+  },
+  "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacPackageTests.derived/runner.swift": {
+    "object": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacPackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacPackageTests.build/runner.swiftdeps",
+    "diagnostics": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacPackageTests.build/runner.dia"
+  }
+}

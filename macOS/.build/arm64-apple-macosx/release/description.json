@@ -1,0 +1,551 @@
+{
+  "builtTestProducts" : [
+
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.SystemPulseChecks-arm64-apple-macosx-release.module" : {
+      "executable" : "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "fileList" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseChecks.build/sources",
+      "importPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseChecks/main.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules/SystemPulseCore.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseChecks.build/sources"
+        }
+      ],
+      "isLibrary" : false,
+      "moduleName" : "SystemPulseChecks",
+      "moduleOutputPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules/SystemPulseChecks.swiftmodule",
+      "objects" : [
+        "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseChecks.build/main.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-whole-module-optimization",
+        "-num-threads",
+        "12",
+        "-serialize-diagnostics",
+        "-O",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/ModuleCache",
+        "-parseable-output",
+        "-Xfrontend",
+        "-entry-point-function-name",
+        "-Xfrontend",
+        "SystemPulseChecks_main",
+        "-swift-version",
+        "6",
+        "-I",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-L",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-plugin-path",
+        "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "macos"
+      ],
+      "outputFileMapPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseChecks.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseChecks.build/main.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules/SystemPulseChecks.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseChecks/main.swift"
+      ],
+      "tempsPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseChecks.build",
+      "wholeModuleOptimization" : true
+    },
+    "C.SystemPulseCore-arm64-apple-macosx-release.module" : {
+      "executable" : "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "fileList" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/sources",
+      "importPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseCore/MetricsLogic.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "SystemPulseCore",
+      "moduleOutputPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules/SystemPulseCore.swiftmodule",
+      "objects" : [
+        "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/MetricsLogic.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-whole-module-optimization",
+        "-num-threads",
+        "12",
+        "-serialize-diagnostics",
+        "-O",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/include/SystemPulseCore-Swift.h",
+        "-swift-version",
+        "6",
+        "-I",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-L",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-plugin-path",
+        "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "macos"
+      ],
+      "outputFileMapPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/MetricsLogic.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules/SystemPulseCore.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseCore/MetricsLogic.swift"
+      ],
+      "tempsPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build",
+      "wholeModuleOptimization" : true
+    },
+    "C.SystemPulseMac-arm64-apple-macosx-release.module" : {
+      "executable" : "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "fileList" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMac.build/sources",
+      "importPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseMac/SystemPulseMac.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules/SystemPulseCore.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMac.build/sources"
+        }
+      ],
+      "isLibrary" : false,
+      "moduleName" : "SystemPulseMac",
+      "moduleOutputPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules/SystemPulseMac.swiftmodule",
+      "objects" : [
+        "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMac.build/SystemPulseMac.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-whole-module-optimization",
+        "-num-threads",
+        "12",
+        "-serialize-diagnostics",
+        "-O",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/ModuleCache",
+        "-parseable-output",
+        "-Xfrontend",
+        "-entry-point-function-name",
+        "-Xfrontend",
+        "SystemPulseMac_main",
+        "-parse-as-library",
+        "-swift-version",
+        "6",
+        "-I",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-L",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-plugin-path",
+        "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "macos"
+      ],
+      "outputFileMapPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMac.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMac.build/SystemPulseMac.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules/SystemPulseMac.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseMac/SystemPulseMac.swift"
+      ],
+      "tempsPath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMac.build",
+      "wholeModuleOptimization" : true
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "SystemPulseChecks" : [
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "-module-name",
+      "SystemPulseChecks",
+      "-package-name",
+      "macos",
+      "-c",
+      "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseChecks/main.swift",
+      "-I",
+      "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-whole-module-optimization",
+      "-num-threads",
+      "12",
+      "-serialize-diagnostics",
+      "-O",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/ModuleCache",
+      "-parseable-output",
+      "-Xfrontend",
+      "-entry-point-function-name",
+      "-Xfrontend",
+      "SystemPulseChecks_main",
+      "-swift-version",
+      "6",
+      "-I",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-L",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-plugin-path",
+      "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "macos",
+      "-driver-use-frontend-path",
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+    ],
+    "SystemPulseCore" : [
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "-module-name",
+      "SystemPulseCore",
+      "-package-name",
+      "macos",
+      "-c",
+      "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseCore/MetricsLogic.swift",
+      "-I",
+      "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-whole-module-optimization",
+      "-num-threads",
+      "12",
+      "-serialize-diagnostics",
+      "-O",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/include/SystemPulseCore-Swift.h",
+      "-swift-version",
+      "6",
+      "-I",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-L",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-plugin-path",
+      "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "macos",
+      "-driver-use-frontend-path",
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+    ],
+    "SystemPulseMac" : [
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "-module-name",
+      "SystemPulseMac",
+      "-package-name",
+      "macos",
+      "-c",
+      "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseMac/SystemPulseMac.swift",
+      "-I",
+      "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-whole-module-optimization",
+      "-num-threads",
+      "12",
+      "-serialize-diagnostics",
+      "-O",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/ModuleCache",
+      "-parseable-output",
+      "-Xfrontend",
+      "-entry-point-function-name",
+      "-Xfrontend",
+      "SystemPulseMac_main",
+      "-parse-as-library",
+      "-swift-version",
+      "6",
+      "-I",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-L",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-plugin-path",
+      "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "macos",
+      "-driver-use-frontend-path",
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "SystemPulseChecks" : [
+      "SystemPulseCore"
+    ],
+    "SystemPulseCore" : [
+
+    ],
+    "SystemPulseMac" : [
+      "SystemPulseCore"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseChecks.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseChecks/main.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseChecks.build/sources"
+    },
+    "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseChecks.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseChecks.build/main.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/MetricsLogic.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseChecks.product/Objects.LinkFileList"
+    },
+    "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseCore/MetricsLogic.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/sources"
+    },
+    "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMac.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseMac/SystemPulseMac.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMac.build/sources"
+    },
+    "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMac.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/MetricsLogic.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMac.build/SystemPulseMac.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMac.product/Objects.LinkFileList"
+    },
+    "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt"
+    }
+  }
+}

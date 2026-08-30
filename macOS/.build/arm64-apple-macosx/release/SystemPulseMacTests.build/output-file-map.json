@@ -1,0 +1,13 @@
+{
+  "": {
+    "dependencies": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacTests.build/SystemPulseMacTests.d",
+    "object": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacTests.build/SystemPulseMacTests.o",
+    "swift-dependencies": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacTests.build/primary.swiftdeps"
+  },
+  "/Users/ttb/system-pulse-widget/macOS/Tests/SystemPulseMacTests/SystemPulseMacTests.swift": {
+    "object": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacTests.build/SystemPulseMacTests.swift.o",
+    "swiftmodule": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacTests.build/SystemPulseMacTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacTests.build/SystemPulseMacTests.swiftdeps",
+    "diagnostics": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseMacTests.build/SystemPulseMacTests.dia"
+  }
+}

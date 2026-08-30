@@ -1,5 +1,36 @@
 # System Pulse Widget
 
+## macOS edition (new)
+
+`macOS/` contains a native Apple-silicon-friendly menu-bar app, tested for this
+MacBook Pro (M2 Pro, 16 GB). It continuously tracks CPU/GPU load, clock and
+temperature, memory, internal-disk read/write speed, network upload/download,
+battery state, charge/discharge wattage, and uptime. It does not require
+administrator rights.
+
+Install it as a regular macOS app (appears in Applications and Launchpad):
+
+```zsh
+cd macOS
+./install-app.sh
+```
+
+Or run it from Terminal without installing:
+
+```zsh
+cd macOS
+./build-and-run.sh
+```
+
+The app appears in the menu bar with live CPU/RAM usage. Click it for the full
+dashboard and choose a 1, 2, or 5 second refresh interval. Private Apple Silicon
+sensors are sampled continuously at 1 second; the dashboard follows the selected
+refresh interval while keeping the latest valid temperature sample.
+
+Building requires `macmon` (`brew install macmon`). The installer bundles the
+MIT-licensed helper inside the app, so the installed `.app` has no Homebrew
+runtime dependency.
+
 A lightweight, modern, real-time hardware and system monitor designed for Windows 10/11 taskbars.
 
 ![System Pulse](https://img.shields.io/badge/Windows-10%20%2F%2011-blue?style=flat-square)

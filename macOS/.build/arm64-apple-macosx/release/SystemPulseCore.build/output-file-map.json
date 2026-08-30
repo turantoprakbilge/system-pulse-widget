@@ -1,0 +1,13 @@
+{
+  "": {
+    "dependencies": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/SystemPulseCore.d",
+    "object": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/SystemPulseCore.o",
+    "swift-dependencies": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/primary.swiftdeps"
+  },
+  "/Users/ttb/system-pulse-widget/macOS/Sources/SystemPulseCore/MetricsLogic.swift": {
+    "object": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/MetricsLogic.swift.o",
+    "swiftmodule": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/MetricsLogic~partial.swiftmodule",
+    "swift-dependencies": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/MetricsLogic.swiftdeps",
+    "diagnostics": "/Users/ttb/system-pulse-widget/macOS/.build/arm64-apple-macosx/release/SystemPulseCore.build/MetricsLogic.dia"
+  }
+}
